@@ -65,4 +65,15 @@ var Commands = []Command {
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+help`),
 		Handler: helphandler,
 	},
+	{
+		Name: "source",
+		Description: "Gives you a link to my source code.",
+		Aliases: []string {
+			"src",
+			"git",
+			"repo",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(source|src|git|repo)`),
+		Handler: srchandler,
+	},
 }

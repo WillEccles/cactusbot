@@ -71,3 +71,27 @@ func helphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 		log.Printf("Error in helphandler:\n%v\n", err)
 	}
 }
+
+func srchandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	srcembed := &discordgo.MessageEmbed{
+		URL: RepoURL,
+		Color: s.State.UserColor(s.State.User.ID, msg.ChannelID),
+		Title: "Github: willeccles/cactusbot",
+		Description: "The source code for the cactus bot!",
+		Author: &discordgo.MessageEmbedAuthor {
+			URL: "https://eccles.dev",
+			Name: "Will Eccles (a tiny cactus)",
+			IconURL: "https://eccles.dev/imgs/avatar.jpg",
+		},
+		Fields: []*discordgo.MessageEmbedField {
+			&discordgo.MessageEmbedField{
+				Name: "Details",
+				Value: "**Language:** go\n**Library:** discordgo",
+			},
+		},
+	}
+	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, srcembed)
+	if err != nil {
+		log.Printf("Error in srchandler:\n%v\n", err)
+	}
+}

@@ -15,6 +15,7 @@ const (
 	Perms = 251968
 	ClientID = "237605108173635584"
 	InvURL = "https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v"
+	RepoURL = "https://github.com/willeccles/cactusbot"
 )
 
 func init() {
@@ -42,7 +43,11 @@ func main() {
 			Inline: false,
 		}
 		if len(cmd.Aliases) != 0 {
-			newfield.Value += "\n**Alias(es):** "
+			if len(cmd.Aliases) == 1 {
+				newfield.Value += "\n**Alias:** "
+			} else {
+				newfield.Value += "\n**Aliases:** "
+			}
 			for i, a := range(cmd.Aliases) {
 				if i > 0 {
 					newfield.Value += ", "
@@ -80,17 +85,15 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 	log.Println("Client ready.")
 
 	// set the status to "watching you"
-	game := discordgo.Game {
-		Name: "you.",
-		Type: discordgo.GameTypeWatching,
-	}
-
 	i := 0
 	usd := discordgo.UpdateStatusData{
 		IdleSince: &i,
 		AFK: false,
 		Status: "online",
-		Game: &game,
+		Game: &discordgo.Game {
+			Name: "you OwO",
+			Type: discordgo.GameTypeWatching,
+		},
 	}
 
 	err := s.UpdateStatusComplex(usd)
