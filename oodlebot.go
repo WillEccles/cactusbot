@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"log"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -16,6 +17,8 @@ const (
 	ClientID = "237605108173635584"
 	InvURL = "https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v"
 	RepoURL = "https://github.com/willeccles/cactusbot"
+	DebugChannel = "245649734302302208"
+	DebugAtID = "111943010396229632"
 )
 
 func init() {
@@ -60,16 +63,19 @@ func main() {
 
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
-		fmt.Println("Error creating Discord session: ", err)
+		log.Println("Error creating Discord session: ", err)
 		return
 	}
 
 	dg.AddHandler(ready)
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(connect)
+	dg.AddHandler(resume)
+	dg.AddHandler(disconnect)
 
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("Error opening Discord session: ", err)
+		log.Println("Error opening Discord session: ", err)
 		return
 	}
 	defer fmt.Println("\nGoodbye.")
@@ -91,14 +97,14 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 		AFK: false,
 		Status: "online",
 		Game: &discordgo.Game {
-			Name: "you OwO",
+			Name: "you ÒwÓ",
 			Type: discordgo.GameTypeWatching,
 		},
 	}
 
 	err := s.UpdateStatusComplex(usd)
 	if err != nil {
-		fmt.Printf("Error in ready:\n%v\n", err)
+		log.Printf("Error in ready:\n%v\n", err)
 	}
 }
 
@@ -113,5 +119,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			cmd.Handle(m, s)
 			break
 		}
+	}
+}
+
+func connect(s *discordgo.Session, event *discordgo.Connect) {
+	log.Println("Client connected.")
+}
+
+func disconnect(s *discordgo.Session, event *discordgo.Disconnect) {
+	log.Println("Client disconnected!")
+}
+
+func resume(s *discordgo.Session, event *discordgo.Resumed) {
+	log.Println("Resumed, attempting to send debug message.")
+	_, err := s.ChannelMessageSend(DebugChannel, fmt.Sprintf("Just recovered from error(s)! <@%v>\n```\n%v\n```", DebugAtID, strings.Join(event.Trace, "\n")))
+	if err != nil {
+		log.Printf("Error in resume (this is awkward):\n%v\n", err)
 	}
 }

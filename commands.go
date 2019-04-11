@@ -51,6 +51,12 @@ var Commands = []Command {
 		Handler: blocklettershandler,
 	},
 	{
+		Name: "xkcd",
+		Description: "Displays either today's xkcd or the specified xkcd. For today's, simply use `xkcd`. For a specific one, use `xkcd <number>`.",
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+xkcd(\s+\d+)?`),
+		Handler: xkcdhandler,
+	},
+	{
 		Name: "invite",
 		Description: "Creates a discord invite link for to add this bot to another server.",
 		Aliases: []string {
