@@ -91,7 +91,7 @@ func main() {
 	defer dg.Close() // close the session after Control-C
 
 	fmt.Println("Cactusbot is now running. Press Control+C to exit.")
-	SigChan = make(chan os.Signal, 1)
+	SigChan = make(chan os.Signal)
 	signal.Notify(SigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-SigChan
 }
