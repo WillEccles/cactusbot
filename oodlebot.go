@@ -5,8 +5,16 @@ import (
 	"fmt"
 	"syscall"
 	"os"
+	"os/signal"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
+)
+
+const (
+	Perms = 251968
+	ClientID = "237605108173635584"
+	InvURL = "https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v"
 )
 
 func init() {
@@ -18,7 +26,7 @@ var token string
 
 func main() {
 	if token == "" {
-		fmt.Println("No token provided. Please run: oodlebotgo -t <token>")
+		fmt.Println("No token provided. Please run: cactusbot -t <token>")
 		return
 	}
 
@@ -36,18 +44,29 @@ func main() {
 		fmt.Println("Error opening Discord session: ", err)
 		return
 	}
+	defer fmt.Println("\nGoodbye.")
 	defer dg.Close() // close the session after Control-C
 
-	fmt.Println("Oodlebot is now running. Press Control+C to exit.")
+	fmt.Println("Cactusbot is now running. Press Control+C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 }
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
-	// TODO
+	log.Println("Client ready.")
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// TODO
+	// ignore the bot's own messages
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	for _, cmd := range(Commands) {
+		if cmd.Pattern.MatchString(m.Content) {
+			cmd.Handle(m, s)
+			break
+		}
+	}
 }

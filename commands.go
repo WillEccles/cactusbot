@@ -5,7 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type MsgHandler func(*discordgo.Message, *discordgo.Session)
+type MsgHandler func(*discordgo.MessageCreate, *discordgo.Session)
 
 type Command struct {
 	Pattern *regexp.Regexp
@@ -15,17 +15,21 @@ type Command struct {
 	Handler MsgHandler
 }
 
+func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	cmd.Handler(msg, s)
+}
+
 var Commands = []Command {
 	{
 		Name: "oodle",
 		Description: "Replaces every vowel in a message with 'oodle' or 'OODLE', depending on whether or not it's a capital.",
-		Pattern: regexp.MustCompile(`^c(actus)? oodle\s+.*[aeiouAEIOU].*`),
+		Pattern: regexp.MustCompile(`^(?i)c(actus)?\s+oodle\s+.*[aeiou].*`),
 		Handler: oodlehandler,
 	},
 	{
 		Name: "oodletts",
 		Description: "Works the same as ?oodle, but responds with a TTS message.",
-		Pattern: regexp.MustCompile(`^c(actus)? oodletts\s+.*[aeiouAEIOU].*`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodletts\s+.*[aeiou].*`),
 		Handler: oodlettshandler,
 	},
 	{
@@ -34,7 +38,7 @@ var Commands = []Command {
 		Aliases: []string {
 			"cf",
 		},
-		Pattern: regexp.MustCompile(`^c(actus)? coinflip`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(coinflip|cf)`),
 		Handler: coinfliphandler,
 	},
 	{
@@ -43,7 +47,7 @@ var Commands = []Command {
 		Aliases: []string {
 			"bl",
 		},
-		Pattern: regexp.MustCompile(`^c(actus)? bl(ockletters)?\s+\S+`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+bl(ockletters)?\s+\S+`),
 		Handler: blocklettershandler,
 	},
 	{
@@ -52,13 +56,13 @@ var Commands = []Command {
 		Aliases: []string {
 			"inv",
 		},
-		Pattern: regexp.MustCompile(`^c(actus)? inv(ite)?`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+inv(ite)?`),
 		Handler: invitehandler,
 	},
 	{
 		Name: "help",
 		Description: "Displays the help message.",
-		Pattern: regexp.MustCompile(`^c(actus)? help`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+help`),
 		Handler: helphandler,
 	},
 }
