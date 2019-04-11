@@ -23,11 +23,34 @@ func init() {
 }
 
 var token string
+var HelpEmbed discordgo.MessageEmbed
 
 func main() {
 	if token == "" {
 		fmt.Println("No token provided. Please run: cactusbot -t <token>")
 		return
+	}
+
+	// prepare a help embed to reduce CPU load later on
+	HelpEmbed.Title = "**Here's what I can do!**"
+	HelpEmbed.Description = "You should begin each command with `cactus` or simply `c`.\nFor example: `cactus help` or `c help`."
+
+	for _, cmd := range(Commands) {
+		newfield := discordgo.MessageEmbedField{
+			Name: "**`" + cmd.Name + "`**",
+			Value: cmd.Description,
+			Inline: false,
+		}
+		if len(cmd.Aliases) != 0 {
+			newfield.Value += "\n**Alias(es):** "
+			for i, a := range(cmd.Aliases) {
+				if i > 0 {
+					newfield.Value += ", "
+				}
+				newfield.Value += "`" + a + "`"
+			}
+		}
+		HelpEmbed.Fields = append(HelpEmbed.Fields, &newfield)
 	}
 
 	dg, err := discordgo.New("Bot " + token)
@@ -55,6 +78,25 @@ func main() {
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
 	log.Println("Client ready.")
+
+	// set the status to "watching you"
+	game := discordgo.Game {
+		Name: "you.",
+		Type: discordgo.GameTypeWatching,
+	}
+
+	i := 0
+	usd := discordgo.UpdateStatusData{
+		IdleSince: &i,
+		AFK: false,
+		Status: "online",
+		Game: &game,
+	}
+
+	err := s.UpdateStatusComplex(usd)
+	if err != nil {
+		fmt.Printf("Error in ready:\n%v\n", err)
+	}
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {

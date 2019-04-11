@@ -28,7 +28,7 @@ var Commands = []Command {
 	},
 	{
 		Name: "oodletts",
-		Description: "Works the same as ?oodle, but responds with a TTS message.",
+		Description: "Works the same as `oodle`, but responds with a TTS message.",
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodletts\s+.*[aeiou].*`),
 		Handler: oodlettshandler,
 	},
@@ -61,7 +61,7 @@ var Commands = []Command {
 	},
 	{
 		Name: "help",
-		Description: "Displays the help message.",
+		Description: "Displays this help message.",
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+help`),
 		Handler: helphandler,
 	},

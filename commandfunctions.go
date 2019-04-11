@@ -62,17 +62,11 @@ func invitehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 }
 
 func helphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
-	var helpembed discordgo.MessageEmbed
-	helpembed.Color = s.State.UserColor(s.State.User.ID, msg.ChannelID)
-	helpembed.Title = "**Here's what I can do!**"
-	helpembed.Description = `You should begin each command with "cactus" or simply "c."` + "\n" + `For example: "cactus help" or "c help"`
-	var helpfield = discordgo.MessageEmbedField{
-		Name: "Testname",
-		Value: "Testvalue",
-		Inline: true,
-	}
-	helpembed.Fields = append(helpembed.Fields, &helpfield)
-	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, &helpembed)
+	embedcolor := s.State.UserColor(s.State.User.ID, msg.ChannelID)
+	embed := HelpEmbed
+	embed.Color = embedcolor
+
+	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, &embed)
 	if err != nil {
 		log.Printf("Error in helphandler:\n%v\n", err)
 	}
