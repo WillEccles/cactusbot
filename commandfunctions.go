@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 	"strconv"
+	"syscall"
 )
 
 func oodlehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
@@ -84,6 +85,15 @@ func helphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	if err != nil {
 		log.Printf("Error in helphandler:\n%v\n", err)
 	}
+}
+
+func shutdownhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	_, err := s.ChannelMessageSend(msg.ChannelID, "Goodbye!")
+	if err != nil {
+		log.Printf("Error in shutdownhandler:\n%v\n", err)
+	}
+
+	SigChan <- syscall.SIGINT
 }
 
 func srchandler(msg *discordgo.MessageCreate, s *discordgo.Session) {

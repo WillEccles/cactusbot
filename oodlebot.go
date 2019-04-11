@@ -18,7 +18,7 @@ const (
 	InvURL = "https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v"
 	RepoURL = "https://github.com/willeccles/cactusbot"
 	DebugChannel = "245649734302302208"
-	DebugAtID = "111943010396229632"
+	AdminID = "111943010396229632"
 )
 
 func init() {
@@ -28,6 +28,7 @@ func init() {
 
 var token string
 var HelpEmbed discordgo.MessageEmbed
+var SigChan chan os.Signal
 
 func main() {
 	if token == "" {
@@ -40,6 +41,11 @@ func main() {
 	HelpEmbed.Description = "You should begin each command with `cactus` or simply `c`.\nFor example: `cactus help` or `c help`."
 
 	for _, cmd := range(Commands) {
+		// only show non-admin commands
+		if cmd.AdminOnly {
+			continue
+		}
+
 		newfield := discordgo.MessageEmbedField{
 			Name: "**`" + cmd.Name + "`**",
 			Value: cmd.Description,
@@ -82,9 +88,9 @@ func main() {
 	defer dg.Close() // close the session after Control-C
 
 	fmt.Println("Cactusbot is now running. Press Control+C to exit.")
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
+	SigChan = make(chan os.Signal, 1)
+	signal.Notify(SigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-SigChan
 }
 
 func ready(s *discordgo.Session, event *discordgo.Ready) {
@@ -132,7 +138,7 @@ func disconnect(s *discordgo.Session, event *discordgo.Disconnect) {
 
 func resume(s *discordgo.Session, event *discordgo.Resumed) {
 	log.Println("Resumed, attempting to send debug message.")
-	_, err := s.ChannelMessageSend(DebugChannel, fmt.Sprintf("Just recovered from error(s)! <@%v>\n```\n%v\n```", DebugAtID, strings.Join(event.Trace, "\n")))
+	_, err := s.ChannelMessageSend(DebugChannel, fmt.Sprintf("Just recovered from error(s)! <@%v>\n```\n%v\n```", AdminID, strings.Join(event.Trace, "\n")))
 	if err != nil {
 		log.Printf("Error in resume (this is awkward):\n%v\n", err)
 	}

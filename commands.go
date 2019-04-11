@@ -13,9 +13,14 @@ type Command struct {
 	Description string
 	Aliases []string
 	Handler MsgHandler
+	AdminOnly bool
 }
 
 func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	if cmd.AdminOnly && msg.Author.ID != AdminID {
+		return
+	}
+
 	cmd.Handler(msg, s)
 }
 
@@ -81,5 +86,15 @@ var Commands = []Command {
 		},
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(source|src|git|repo)`),
 		Handler: srchandler,
+	},
+	{
+		Name: "shutdown",
+		Description: "Shuts down the bot.",
+		Aliases: []string {
+			"sd",
+		},
+		AdminOnly: true,
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(shutdown|sd)`),
+		Handler: shutdownhandler,
 	},
 }
