@@ -28,7 +28,7 @@ var Commands = []Command {
 	{
 		Name: "oodle",
 		Description: "Replaces every vowel in a message with 'oodle' or 'OODLE', depending on whether or not it's a capital.",
-		Pattern: regexp.MustCompile(`^(?i)c(actus)?\s+oodle\s+.*[aeiou].*`),
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodle\s+.*[aeiou].*`),
 		Handler: oodlehandler,
 	},
 	{
