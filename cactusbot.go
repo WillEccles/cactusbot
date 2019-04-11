@@ -31,6 +31,8 @@ var HelpEmbed discordgo.MessageEmbed
 var SigChan chan os.Signal
 
 func main() {
+	log.SetPrefix("[Cactusbot] ")
+
 	if token == "" {
 		fmt.Println("No token provided. Please run: cactusbot -t <token>")
 		return
