@@ -19,6 +19,7 @@ const (
 	RepoURL = "https://github.com/willeccles/cactusbot"
 	DebugChannel = "245649734302302208"
 	AdminID = "111943010396229632"
+	ControllerID = "565946505026863145"
 )
 
 func init() {

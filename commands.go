@@ -17,7 +17,7 @@ type Command struct {
 }
 
 func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
-	if cmd.AdminOnly && msg.Author.ID != AdminID {
+	if cmd.AdminOnly && (msg.Author.ID != AdminID || msg.Author.ID != ControllerID ) {
 		return
 	}
 
