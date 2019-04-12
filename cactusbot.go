@@ -106,7 +106,7 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 		AFK: false,
 		Status: "online",
 		Game: &discordgo.Game {
-			Name: "you ÒwÓ",
+			Name: "you OwO",
 			Type: discordgo.GameTypeWatching,
 		},
 	}
