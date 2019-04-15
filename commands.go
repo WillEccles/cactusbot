@@ -26,13 +26,13 @@ func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
 
 var Commands = []Command {
 	{
-		Name: "oodle",
+		Name: "oodle <message>",
 		Description: "Replaces every vowel in a message with 'oodle' or 'OODLE', depending on whether or not it's a capital.",
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodle\s+.*[aeiou].*`),
 		Handler: oodlehandler,
 	},
 	{
-		Name: "oodletts",
+		Name: "oodletts <message>",
 		Description: "Works the same as `oodle`, but responds with a TTS message.",
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodletts\s+.*[aeiou].*`),
 		Handler: oodlettshandler,
@@ -47,7 +47,7 @@ var Commands = []Command {
 		Handler: coinfliphandler,
 	},
 	{
-		Name: "blockletters",
+		Name: "blockletters <message>",
 		Description: "Converts as much of a message as possible into block letters using emoji.",
 		Aliases: []string {
 			"bl",
@@ -56,8 +56,8 @@ var Commands = []Command {
 		Handler: blocklettershandler,
 	},
 	{
-		Name: "xkcd",
-		Description: "Displays either today's xkcd or the specified xkcd. For today's, simply use `xkcd`. For a specific one, use `xkcd <number>`.",
+		Name: "xkcd [number]",
+		Description: "If a number is not specified, displays the latest xkcd. Otherwise, shows the specified xkcd. For today's, simply use `xkcd`. For a specific one, use `xkcd [number]`.",
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+xkcd(\s+\d+)?`),
 		Handler: xkcdhandler,
 	},
