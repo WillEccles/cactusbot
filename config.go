@@ -17,11 +17,11 @@ type Configuration struct {
 
 func LoadConfig() Configuration {
 	file, err := os.Open("config.json")
-	defer file.Close()
 	if err != nil {
 		WriteNewConfig()
 		return Configuration{}
 	}
+	defer file.Close()
 	
 	decoder := json.NewDecoder(file)
 	conf := Configuration{}
