@@ -113,7 +113,7 @@ var Commands = []Command {
 		},
 		Description: "Converts as much of `message` as possible into block letters using emoji.",
 		Examples: []string{
-			"`c bl Something` returns \"Something\" written in blockletters.",
+			"`c blockletters Something` returns \"Something\" written in blockletters.",
 		},
 		Aliases: []string {
 			"bl",
@@ -218,6 +218,12 @@ func InitCommandEmbeds(m map[string]*discordgo.MessageEmbed) {
 			m[cmd.Name].Title += fmt.Sprintf(" %s", arg)
 		}
 		m[cmd.Name].Title += "`"
+
+		if cmd.Args != nil {
+			m[cmd.Name].Footer = &discordgo.MessageEmbedFooter{
+				Text: "Arguments in <angle brackets> are required, arguments in [square brackets] are optional.",
+			}
+		}
 
 		m[cmd.Name].Description = cmd.Description
 
