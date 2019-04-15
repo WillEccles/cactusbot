@@ -182,7 +182,7 @@ func xkcdhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 
 	url := "https://xkcd.com/"
 	if comicnum != 0 {
-		url += string(comicnum)
+		url += strconv.Itoa(comicnum)
 	}
 
 	xkcdembed := &discordgo.MessageEmbed{
