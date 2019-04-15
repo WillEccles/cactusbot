@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"syscall"
 	"os"
@@ -14,29 +13,37 @@ import (
 
 const (
 	Perms = 251968
-	ClientID = "237605108173635584"
 	InvURL = "<https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v>"
 	RepoURL = "https://github.com/willeccles/cactusbot"
-	DebugChannel = "245649734302302208"
-	AdminID = "111943010396229632"
-	ControllerID = "565946505026863145"
 )
 
-func init() {
-	flag.StringVar(&token, "t", "", "Bot Token")
-	flag.Parse()
-}
-
-var token string
 var HelpEmbed discordgo.MessageEmbed
 var SigChan chan os.Signal
+var Config Configuration
 
 func main() {
 	log.SetPrefix("[Cactusbot] ")
 
-	if token == "" {
-		fmt.Println("No token provided. Please run: cactusbot -t <token>")
+	Config = LoadConfig()
+
+	if Config.DiscordToken == "" {
+		log.Println("Please provide a discord token in your config.json file.")
 		return
+	}
+	if Config.DiscordClientID == "" {
+		log.Println("Please provide a discord client ID in your config.json file.")
+		return
+	}
+	if Config.DebugChannel == "" {
+		log.Println("Please provide a debug channel ID in your config.json file.")
+		return
+	}
+	if len(Config.AdminIDs) == 0 {
+		log.Println("Please provide at least one admin ID in your config.json file.")
+		return
+	}
+	if Config.ControllerID == "" {
+		log.Println("Controller ID not found in config.json, assuming no controller.")
 	}
 
 	// prepare a help embed to reduce CPU load later on
@@ -70,7 +77,7 @@ func main() {
 		HelpEmbed.Fields = append(HelpEmbed.Fields, &newfield)
 	}
 
-	dg, err := discordgo.New("Bot " + token)
+	dg, err := discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {
 		log.Println("Error creating Discord session: ", err)
 		return
@@ -140,7 +147,7 @@ func disconnect(s *discordgo.Session, event *discordgo.Disconnect) {
 
 func resume(s *discordgo.Session, event *discordgo.Resumed) {
 	log.Println("Resumed, attempting to send debug message.")
-	_, err := s.ChannelMessageSend(DebugChannel, fmt.Sprintf("Just recovered from error(s)! <@%v>\n```\n%v\n```", AdminID, strings.Join(event.Trace, "\n")))
+	_, err := s.ChannelMessageSend(Config.DebugChannel, fmt.Sprintf("Just recovered from error(s)!\n```\n%v\n```", strings.Join(event.Trace, "\n")))
 	if err != nil {
 		log.Printf("Error in resume (this is awkward):\n%v\n", err)
 	}

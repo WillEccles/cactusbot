@@ -69,7 +69,7 @@ func blocklettershandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 }
 
 func invitehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
-	inv := fmt.Sprintf("Use this link to invite me to your server: " + InvURL, ClientID, Perms)
+	inv := fmt.Sprintf("Use this link to invite me to your server: " + InvURL, Config.DiscordClientID, Perms)
 	_, err := s.ChannelMessageSend(msg.ChannelID, inv)
 	if err != nil {
 		log.Printf("Error in invitehandler:\n%v\n", err)
