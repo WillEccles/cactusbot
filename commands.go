@@ -57,6 +57,9 @@ var CommandCategories = map[string]*struct{
 	},
 }
 
+// go iterates over maps (using range()) in a random order, so this is used to combat that
+var CmdCatOrder = []string{ "fun", "text", "util" }
+
 var Commands = []Command {
 	{
 		Name: "oodle",
@@ -191,7 +194,9 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 	embed.Title = "Command List"
 	embed.Description = "You should begin each command with `cactus` or simply `c`.\nFor example: `cactus help` or `c help`.\nFor info about a particular command, use `c help [command]`."
 
-	for _, cat := range(CommandCategories) {
+	for _, catname := range(CmdCatOrder) {
+		cat := CommandCategories[catname]
+
 		newfield := discordgo.MessageEmbedField{
 			Name: cat.Title,
 			Inline: false,
