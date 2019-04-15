@@ -9,6 +9,7 @@ import (
 	"time"
 	"strconv"
 	"syscall"
+	"strings"
 )
 
 func oodlehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
@@ -77,17 +78,46 @@ func invitehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 }
 
 func helphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	re := regexp.MustCompile(`(?i)^c(actus)?\s+help\s*`)
+	clean := re.ReplaceAllString(msg.Content, "")
 	embedcolor := s.State.UserColor(s.State.User.ID, msg.ChannelID)
-	embed := HelpEmbed
-	embed.Color = embedcolor
+	
+	if clean == "" {
+		embed := HelpEmbed
+		embed.Color = embedcolor
 
-	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, &embed)
-	if err != nil {
-		log.Printf("Error in helphandler:\n%v\n", err)
+		_, err := s.ChannelMessageSendEmbed(msg.ChannelID, &embed)
+		if err != nil {
+			log.Printf("Error in helphandler:\n%v\n", err)
+		}
+	} else {
+		arg := strings.TrimSpace(strings.ToLower(clean))
+		// need to avoid referencing commands.go in here
+		embed, ok := CommandEmbeds[arg]
+		if !ok {
+			_, err := s.ChannelMessageSend(msg.ChannelID, "Command not found: " + arg)
+			if err != nil {
+				log.Printf("Error in helphandler:\n%v\n", err)
+			}
+			return
+		} else {
+			e := *embed
+			e.Color = embedcolor
+			_, err := s.ChannelMessageSendEmbed(msg.ChannelID, &e)
+			if err != nil {
+				log.Printf("Error in helphandler:\n%v\n", err)
+			}
+			return
+		}
 	}
 }
 
 func shutdownhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	if Config.ControllerID != "" {
+		s.ChannelMessageSend(msg.ChannelID, "This bot is running with a controller. You must shut it down from the controller instead.")
+		return
+	}
+
 	_, err := s.ChannelMessageSend(msg.ChannelID, "Goodbye!")
 	if err != nil {
 		log.Printf("Error in shutdownhandler:\n%v\n", err)

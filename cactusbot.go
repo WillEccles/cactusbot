@@ -21,11 +21,20 @@ var HelpEmbed discordgo.MessageEmbed
 var SigChan chan os.Signal
 var Config Configuration
 
-func main() {
+var CommandEmbeds map[string]*discordgo.MessageEmbed
+
+
+func init() {
 	log.SetPrefix("[Cactusbot] ")
-
+	log.Println("init: loading config")
 	Config = LoadConfig()
+	log.Println("init: creating help embeds")
+	InitHelpEmbed(&HelpEmbed)
+	CommandEmbeds = make(map[string]*discordgo.MessageEmbed)
+	InitCommandEmbeds(CommandEmbeds)
+}
 
+func main() {
 	if Config.DiscordToken == "" {
 		log.Println("Please provide a discord token in your config.json file.")
 		return
@@ -44,37 +53,6 @@ func main() {
 	}
 	if Config.ControllerID == "" {
 		log.Println("Controller ID not found in config.json, assuming no controller.")
-	}
-
-	// prepare a help embed to reduce CPU load later on
-	HelpEmbed.Title = "**Here's what I can do!**"
-	HelpEmbed.Description = "You should begin each command with `cactus` or simply `c`.\nFor example: `cactus help` or `c help`."
-
-	for _, cmd := range(Commands) {
-		// only show non-admin commands
-		if cmd.AdminOnly {
-			continue
-		}
-
-		newfield := discordgo.MessageEmbedField{
-			Name: "**`" + cmd.Name + "`**",
-			Value: cmd.Description,
-			Inline: false,
-		}
-		if len(cmd.Aliases) != 0 {
-			if len(cmd.Aliases) == 1 {
-				newfield.Value += "\n**Alias:** "
-			} else {
-				newfield.Value += "\n**Aliases:** "
-			}
-			for i, a := range(cmd.Aliases) {
-				if i > 0 {
-					newfield.Value += ", "
-				}
-				newfield.Value += "`" + a + "`"
-			}
-		}
-		HelpEmbed.Fields = append(HelpEmbed.Fields, &newfield)
 	}
 
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
