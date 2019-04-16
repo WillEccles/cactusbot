@@ -76,7 +76,6 @@ func rollhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 		})
 		if len(args) == 1 {
 			sides, _ := strconv.Atoi(args[0])
-			val := r1.Intn(sides) + 1
 			if sides == 0 {
 				_, err := s.ChannelMessageSend(msg.ChannelID, "Please enter a valid number of sides.")
 				if err != nil {
@@ -84,6 +83,7 @@ func rollhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 				}
 				return
 			}
+			val := r1.Intn(sides) + 1
 			_, err := s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You rolled: %v", val))
 			if err != nil {
 				log.Printf("Error in rollhandler:\n%v\n", err)
