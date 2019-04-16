@@ -107,6 +107,29 @@ var Commands = []Command {
 		Handler: coinfliphandler,
 	},
 	{
+		Name: "roll",
+		Args: []CommandArg {
+			{
+				Title: "count",
+				Required: false,
+			},
+			{
+				Title: "sides",
+				Required: false,
+			},
+		},
+		Description: "Rolls some dice. If no arguments are supplied, a standard 6-sided die is rolled. If there's only one argument, it's `sides`. If there are two, the number of dice comes first, then the number of sides. These can also be separated by a 'd', like `2d10`, and if only sides is specified, it can be `d10`.",
+		Examples: []string{
+			"`c roll` returns 1-6",
+			"`c roll 20` returns 1-20",
+			"`c roll d10` returns 1-10",
+			"`c roll 2d20` returns 1-20 for two dice",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+roll(\s+(\d+)?(\s*d\s*|\s+)?\d+)?`),
+		Category: "fun",
+		Handler: rollhandler,
+	},
+	{
 		Name: "blockletters",
 		Args: []CommandArg {
 			{

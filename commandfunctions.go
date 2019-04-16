@@ -60,6 +60,63 @@ func coinfliphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	}
 }
 
+func rollhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	cleanre := regexp.MustCompile(`(?i)^c(actus)?\s+roll\s*`)
+	clean := strings.TrimSpace(cleanre.ReplaceAllString(msg.Content, ""))
+	if clean == "" {
+		val := r1.Intn(6) + 1
+		_, err := s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You rolled: %v", val))
+		if err != nil {
+			log.Printf("Error in rollhandler:\n%v\n", err)
+		}
+	} else {
+		// split the string and get the arguments
+		args := strings.FieldsFunc(clean, func(r rune) bool {
+			return r == ' ' || r == 'd'
+		})
+		if len(args) == 1 {
+			sides, _ := strconv.Atoi(args[0])
+			val := r1.Intn(sides) + 1
+			if sides == 0 {
+				_, err := s.ChannelMessageSend(msg.ChannelID, "Please enter a valid number of sides.")
+				if err != nil {
+					log.Printf("Error in rollhandler:\n%v\n", err)
+				}
+				return
+			}
+			_, err := s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You rolled: %v", val))
+			if err != nil {
+				log.Printf("Error in rollhandler:\n%v\n", err)
+			}
+		} else if len(args) >= 2 {
+			sides, _ := strconv.Atoi(args[1])
+			num, _ := strconv.Atoi(args[0])
+			if num == 0 {
+				_, err := s.ChannelMessageSend(msg.ChannelID, "Please enter a valid number of dice.")
+				if err != nil {
+					log.Printf("Error in rollhandler:\n%v\n", err)
+				}
+				return
+			}
+			if sides == 0 {
+				_, err := s.ChannelMessageSend(msg.ChannelID, "Please enter a valid number of sides.")
+				if err != nil {
+					log.Printf("Error in rollhandler:\n%v\n", err)
+				}
+				return
+			}
+			var rolls []string
+			for i := 0; i < num; i++ {
+				rolls = append(rolls, strconv.Itoa(r1.Intn(sides) + 1))
+			}
+			_, err := s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You rolled: %v", strings.Join(rolls, ", ")))
+			if err != nil {
+				log.Printf("Error in rollhandler:\n%v\n", err)
+			}
+		}
+	}
+}
+
 func blocklettershandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	re := regexp.MustCompile(`(?i)^c(actus)?\s+bl(ockletters)?\s+`)
 	cleanmsg := re.ReplaceAllString(msg.Content, "")
