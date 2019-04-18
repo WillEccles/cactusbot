@@ -89,7 +89,7 @@ func GetStreamStatusEmbed(stream string) *discordgo.MessageEmbed {
 func GetChannelInfoEmbed(channel string) *discordgo.MessageEmbed {
 	embed := &discordgo.MessageEmbed{}
 	
-	resp, err := http.Get(fmt.Sprintf(StreamStatusURL, stream, Config.TwitchClientID))
+	resp, err := http.Get(fmt.Sprintf(ChannelInfoURL, channel, Config.TwitchClientID))
 	if err != nil {
 		log.Printf("GetChannelInfoEmbed: %v\n", err)
 		return TwitchErrorEmbed
@@ -112,6 +112,10 @@ func GetChannelInfoEmbed(channel string) *discordgo.MessageEmbed {
 	if res.Error != "" {
 		return TwitchNoSuchChannelEmbed // returning nil indicates to the caller that they should instead try using GetChannelInfoEmbed
 	}
+
+	embed.Title = "Info"
+	embed.Color = 0x6441A5
+	embed.Description = fmt.Sprintf("**Last Game:** %s\n**Followers:** %v\n**Views:** %v\n**Account Created:** %v\n**Partner:** %t\n**Mature:** %t", res.Game, res.Followers, res.Views, GetChannelAgeString(&res), res.Partner, res.Mature)
 
 	embed.Author = &discordgo.MessageEmbedAuthor{
 		URL: "https://twitch.tv/" + channel,
