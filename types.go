@@ -48,6 +48,10 @@ type TwitchChannel struct {
 	URL			string	`json:"url"`
 	Views		uint32	`json:"views"`
 	Followers	uint32	`json:"followers"`
+
+	// in case of error when using the channels api
+	Error		string	`json:"error,omitempty"`
+	Message		string	`json:"message,omitempty"`
 }
 
 type TwitchPreviews struct {

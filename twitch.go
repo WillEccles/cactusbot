@@ -17,8 +17,13 @@ import (
 const StreamStatusURL = "https://api.twitch.tv/kraken/streams/%s?client_id=%s"
 const ChannelInfoURL = "https://api.twitch.tv/kraken/channels/%s?client_id=%s"
 var TwitchErrorEmbed = &discordgo.MessageEmbed{
-	Title: "Error getting stream info.",
+	Title: "Error",
 	Description: "Error getting info for the stream! Try again later.",
+	Color: 0xCE0000,
+}
+var TwitchNoSuchChannelEmbed = &discordgo.MessageEmbed{
+	Title: "Error",
+	Description: "That channel does not exist.",
 	Color: 0xCE0000,
 }
 
@@ -82,13 +87,40 @@ func GetStreamStatusEmbed(stream string) *discordgo.MessageEmbed {
 }
 
 func GetChannelInfoEmbed(channel string) *discordgo.MessageEmbed {
-	return nil
-}
+	embed := &discordgo.MessageEmbed{}
+	
+	resp, err := http.Get(fmt.Sprintf(StreamStatusURL, stream, Config.TwitchClientID))
+	if err != nil {
+		log.Printf("GetChannelInfoEmbed: %v\n", err)
+		return TwitchErrorEmbed
+	}
+	defer resp.Body.Close()
 
-const (
-	HoursPerYear = 24.0 * 365.25
-	HoursPerMonth = 730
-)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("GetChannelInfoEmbed: %v\n", err)
+		return TwitchErrorEmbed
+	}
+	
+	var res TwitchChannel
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		log.Printf("GetChannelInfoEmbed: %v\n", err)
+		return TwitchErrorEmbed
+	}
+
+	if res.Error != "" {
+		return TwitchNoSuchChannelEmbed // returning nil indicates to the caller that they should instead try using GetChannelInfoEmbed
+	}
+
+	embed.Author = &discordgo.MessageEmbedAuthor{
+		URL: "https://twitch.tv/" + channel,
+		Name: res.DisplayName,
+		IconURL: res.Avatar,
+	}
+
+	return embed
+}
 
 func GetUptimeString(stream *TwitchStream) string {
 	created, _ := time.Parse("2006-01-02T15:04:05Z", stream.CreatedAt)
@@ -98,5 +130,5 @@ func GetUptimeString(stream *TwitchStream) string {
 
 func GetChannelAgeString(channel *TwitchChannel) string {
 	created, _ := time.Parse("2006-01-02T15:04:05Z", channel.CreatedAt)
-	return created.Format("Jan _2 15:04:05") + " UTC"
+	return created.Format("Jan _2 2006 15:04:05") + " UTC"
 }
