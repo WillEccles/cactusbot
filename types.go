@@ -66,6 +66,18 @@ type TwitchLinks struct {
 	Channel	string	`json:"channel,omitempty"`
 }
 
+type TwitchFollowData struct {
+	CreatedAt		string			`json:"created_at"`
+	Links			*TwitchLinks	`json:"_links"`
+	Channel			*TwitchChannel	`json:"channel"`
+	Notifications	bool			`json:"notifications"`
+
+	// if there's an error
+	Error	string	`json:"error,omitempty"`
+	Status	int		`json:"status,omitempty"`
+	Message	string	`json:"message,omitempty"`
+}
+
 /* Commands */
 
 type MsgHandler func(*discordgo.MessageCreate, *discordgo.Session)

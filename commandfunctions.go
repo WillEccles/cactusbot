@@ -273,3 +273,15 @@ func ttvhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 		log.Printf("Error in ttvhandler:\n%v\n", err)
 	}
 }
+
+func ttvfollowagehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	re := regexp.MustCompile(`(?i)^c(actus)?\s+(ttvf(ollowage)?|twitchfollowage|tfollow|tfage)\s+`)
+	usernames := strings.Fields(strings.TrimSpace(re.ReplaceAllString(msg.Content, "")))
+
+	embed := GetFollowAgeEmbed(usernames[0], usernames[1])
+
+	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+	if err != nil {
+		log.Printf("Error in ttvhandler:\n%v\n", err)
+	}
+}

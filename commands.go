@@ -209,6 +209,32 @@ var Commands = []Command {
 		Category: "twitch",
 		Handler: ttvhandler,
 	},
+	{
+		Name: "ttvfollowage",
+		Args: []CommandArg {
+			{
+				Title: "user",
+				Required: true,
+			},
+			{
+				Title: "channel",
+				Required: true,
+			},
+		},
+		Description: "Finds out how long `user` has been following `channel`.",
+		Examples: []string{
+			"`c ttvfollowage shroud timthetatman` will tell you how long shroud has followed timthetatman.",
+		},
+		Aliases: []string {
+			"ttvf",
+			"twitchfollowage",
+			"tfollow",
+			"tfage",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(ttvf(ollowage)?|twitchfollowage|tfollow|tfage)\s+[A-Z0-9_]{4,25}\s+[A-Z0-9_]{4,25}\s*$`),
+		Category: "twitch",
+		Handler: ttvfollowagehandler,
+	},
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {
