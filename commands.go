@@ -28,16 +28,16 @@ var CommandCategories = map[string]*struct{
 	Cmds []*Command
 }{
 	"text": {
-		Title: "Text",
+		Title: ":page_facing_up: Text",
 	},
 	"fun": {
-		Title: "Fun",
+		Title: ":game_die: Fun",
 	},
 	"util": {
-		Title: "Utility",
+		Title: ":wrench: Utility",
 	},
 	"twitch": {
-		Title: "Twitch",
+		Title: "<:CB_Twitch:568522608371433493> Twitch",
 	},
 }
 

@@ -187,7 +187,7 @@ func srchandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	srcembed := &discordgo.MessageEmbed{
 		URL: RepoURL,
 		Color: s.State.UserColor(s.State.User.ID, msg.ChannelID),
-		Title: "Github: willeccles/cactusbot",
+		Title: "Repo: willeccles/cactusbot",
 		Description: "The source code for the cactus bot!",
 		Author: &discordgo.MessageEmbedAuthor {
 			URL: "https://eccles.dev",
