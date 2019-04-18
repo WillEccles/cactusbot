@@ -263,5 +263,13 @@ func xkcdhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 func ttvhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	re := regexp.MustCompile(`(?i)^c(actus)?\s+(ttv|twitch|ttvstatus|twitchstatus)\s+`)
 	username := strings.TrimSpace(re.ReplaceAllString(msg.Content, ""))
-	GetStreamStatusEmbed(username)
+	embed := GetStreamStatusEmbed(username)
+	if embed == nil {
+		embed = GetChannelInfoEmbed(username)
+	}
+
+	_, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+	if err != nil {
+		log.Printf("Error in ttvhandler:\n%v\n", err)
+	}
 }

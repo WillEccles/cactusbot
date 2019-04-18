@@ -8,8 +8,8 @@ import (
 /* Twitch */
 
 type StreamStatus struct {
-	Stream	*Stream	`json:"stream,omitempty"`
-	Links	*Links	`json:"_links,omitempty"`
+	Stream	*TwitchStream	`json:"stream,omitempty"`
+	Links	*TwitchLinks	`json:"_links,omitempty"`
 
 	// in case of errors:
 	Error	string	`json:"error,omitempty"`
@@ -17,22 +17,22 @@ type StreamStatus struct {
 	Message	string	`json:"message,omitempty"`
 }
 
-type Stream struct {
-	ID			uint64		`json:"_id"`
-	Game		string		`json:"game"`
-	Viewers		int			`json:"viewers"`
-	VideoHeight	int			`json:"video_height"`
-	AvgFPS		float64		`json:"average_fps"`
-	Delay		int			`json:"delay"`
-	CreatedAt	string		`json:"created_at"`
-	IsPlaylist	bool		`json:"is_playlist"`
-	StreamType	string		`json:"stream_type"`
-	Previews	*Previews	`json:"preview"`
-	Channel		*Channel	`json:"channel"`
-	Links		*Links		`json:"_links"`
+type TwitchStream struct {
+	ID			uint64			`json:"_id"`
+	Game		string			`json:"game"`
+	Viewers		int				`json:"viewers"`
+	VideoHeight	int				`json:"video_height"`
+	AvgFPS		float64			`json:"average_fps"`
+	Delay		int				`json:"delay"`
+	CreatedAt	string			`json:"created_at"`
+	IsPlaylist	bool			`json:"is_playlist"`
+	StreamType	string			`json:"stream_type"`
+	Previews	*TwitchPreviews	`json:"preview"`
+	Channel		*TwitchChannel	`json:"channel"`
+	Links		*TwitchLinks	`json:"_links"`
 }
 
-type Channel struct {
+type TwitchChannel struct {
 	ID			uint64	`json:"_id"`
 	Mature		bool	`json:"mature"`
 	Partner		bool	`json:"partner"`
@@ -50,14 +50,14 @@ type Channel struct {
 	Followers	uint32	`json:"followers"`
 }
 
-type Previews struct {
+type TwitchPreviews struct {
 	Small		string	`json:"small"`
 	Medium		string	`json:"medium"`
 	Large		string	`json:"large"`
 	Template	string	`json:"template"`
 }
 
-type Links struct {
+type TwitchLinks struct {
 	Self	string	`json:"self"`
 	Channel	string	`json:"channel,omitempty"`
 }

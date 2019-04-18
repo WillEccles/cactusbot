@@ -195,7 +195,7 @@ var Commands = []Command {
 				Required: true,
 			},
 		},
-		Description: "Gets the current status of a Twitch stream.",
+		Description: "Gets the stats/current status of a Twitch stream.",
 		Examples: []string{
 			"`c ttv shroud` returns an embed containing Shroud's game, viewer count, etc.",
 		},
