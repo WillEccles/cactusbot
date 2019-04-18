@@ -109,7 +109,11 @@ func rollhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 			for i := 0; i < num; i++ {
 				rolls = append(rolls, strconv.Itoa(r1.Intn(sides) + 1))
 			}
-			_, err := s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("You rolled: %v", strings.Join(rolls, ", ")))
+			replymsg := fmt.Sprintf("You rolled: %v", strings.Join(rolls, ", "))
+			if len(replymsg) > 2000 {
+				replymsg = "Cannot fit that many dice into one message!"
+			}
+			_, err := s.ChannelMessageSend(msg.ChannelID, replymsg)
 			if err != nil {
 				log.Printf("Error in rollhandler:\n%v\n", err)
 			}
