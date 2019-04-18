@@ -7,25 +7,6 @@ import (
 	"strings"
 )
 
-type MsgHandler func(*discordgo.MessageCreate, *discordgo.Session)
-
-type Command struct {
-	Pattern *regexp.Regexp
-	Name string
-	Args []CommandArg
-	Examples []string
-	Description string
-	Aliases []string
-	Handler MsgHandler
-	Category string // if "" the command won't be listed in help menu
-	AdminOnly bool
-}
-
-type CommandArg struct {
-	Title string
-	Required bool
-}
-
 func (carg CommandArg) String() string {
 	if carg.Required {
 		return fmt.Sprintf("<%v>", carg.Title)
@@ -55,10 +36,13 @@ var CommandCategories = map[string]*struct{
 	"util": {
 		Title: "Utility",
 	},
+	"twitch": {
+		Title: "Twitch",
+	},
 }
 
 // go iterates over maps (using range()) in a random order, so this is used to combat that
-var CmdCatOrder = []string{ "fun", "text", "util" }
+var CmdCatOrder = []string{ "fun", "text", "twitch", "util" }
 
 var Commands = []Command {
 	{
@@ -203,6 +187,28 @@ var Commands = []Command {
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(shutdown|sd)`),
 		Handler: shutdownhandler,
 	},
+	{
+		Name: "ttv",
+		Args: []CommandArg {
+			{
+				Title: "stream",
+				Required: true,
+			},
+		},
+		Description: "Gets the current status of a Twitch stream.",
+		Examples: []string{
+			"`c ttv shroud` returns an embed containing Shroud's game, viewer count, etc.",
+		},
+		Aliases: []string {
+			"ttvcheck",
+			"twitch",
+			"ttvstatus",
+			"twitchstatus",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(ttv|twitch|ttvstatus|twitchstatus)\s+[A-Z0-9_]{4,25}\s*$`),
+		Category: "twitch",
+		Handler: ttvhandler,
+	},
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {
@@ -219,6 +225,10 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 
 	for _, catname := range(CmdCatOrder) {
 		cat := CommandCategories[catname]
+		if cat.Title == "Twitch" && Config.TwitchClientID == "" {
+			// ignore twitch commands if we can't use them
+			continue
+		}
 
 		newfield := discordgo.MessageEmbedField{
 			Name: cat.Title,
@@ -240,6 +250,10 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 
 func InitCommandEmbeds(m map[string]*discordgo.MessageEmbed) {
 	for _, cmd := range(Commands) {
+		if Config.TwitchClientID == "" && cmd.Category == "twitch" {
+			continue
+		}
+
 		m[cmd.Name] = &discordgo.MessageEmbed{}
 		m[cmd.Name].Title = "`" + cmd.Name
 		for _, arg := range(cmd.Args) {

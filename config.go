@@ -7,12 +7,14 @@ import (
 	"io/ioutil"
 )
 
+// omited from types.go, makes more sense to be in here
 type Configuration struct {
 	DiscordToken string
 	DiscordClientID string
 	DebugChannel string
 	AdminIDs []string
 	ControllerID string
+	TwitchClientID string
 }
 
 func LoadConfig() Configuration {
@@ -29,7 +31,21 @@ func LoadConfig() Configuration {
 	if err != nil {
 		log.Println(err)
 	}
+
 	return conf
+}
+
+func WriteConfig(conf Configuration) {
+	// write the config to file, which ensures all config files stay up to date when new options are added
+	file, err := json.MarshalIndent(conf, "", "\t")
+	if err != nil {
+		log.Println("WriteConfig: Error marshalling json for writing.")
+		return
+	}
+	err = ioutil.WriteFile("config.json", file, 0644)
+	if err != nil {
+		log.Printf("WriteConfig: Error writing config to file! Config:\n%v\n", string(file))
+	}
 }
 
 func WriteNewConfig() {
