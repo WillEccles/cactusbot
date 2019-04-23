@@ -1,4 +1,4 @@
 cactusbot
 *.swp
 run.sh
-config.json
+*.json

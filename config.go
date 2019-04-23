@@ -5,16 +5,17 @@ import (
 	"os"
 	"log"
 	"io/ioutil"
+	"github.com/bwmarrin/discordgo"
 )
 
 // omited from types.go, makes more sense to be in here
 type Configuration struct {
-	DiscordToken string
-	DiscordClientID string
-	DebugChannel string
-	AdminIDs []string
-	ControllerID string
-	TwitchClientID string
+	DiscordToken	string
+	DiscordClientID	string
+	DebugChannel	string
+	AdminIDs		[]string
+	ControllerID	string
+	TwitchClientID	string
 }
 
 func LoadConfig() Configuration {
