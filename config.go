@@ -5,7 +5,6 @@ import (
 	"os"
 	"log"
 	"io/ioutil"
-	"github.com/bwmarrin/discordgo"
 )
 
 // omited from types.go, makes more sense to be in here
