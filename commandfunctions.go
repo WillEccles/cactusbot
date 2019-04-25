@@ -187,6 +187,19 @@ func shutdownhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	SigChan <- syscall.SIGINT
 }
 
+func sownerhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+	guild, err := s.Guild(msg.GuildID)
+	if err != nil {
+		log.Printf("Error in sownerhandler:\n%v\n", err)
+		return
+	}
+
+	_, err = s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("The owner of this server is <@%v>", guild.OwnerID))
+	if err != nil {
+		log.Printf("Error in sownerhandler:\n%v\n", err)
+	}
+}
+
 func srchandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	srcembed := &discordgo.MessageEmbed{
 		URL: RepoURL,

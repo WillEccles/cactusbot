@@ -188,6 +188,13 @@ var Commands = []Command {
 		Handler: shutdownhandler,
 	},
 	{
+		Name: "sowner",
+		Description: "Returns the user who owns the server.",
+		AdminOnly: true,
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+sowner`),
+		Handler: sownerhandler,
+	},
+	{
 		Name: "ttv",
 		Args: []CommandArg {
 			{
