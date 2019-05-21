@@ -150,7 +150,7 @@ func resume(s *discordgo.Session, event *discordgo.Resumed) {
 		},
 	}
 
-	err := s.UpdateStatusComplex(usd)
+	err = s.UpdateStatusComplex(usd)
 	if err != nil {
 		log.Printf("Error in resume (this is awkward):\n%v\n", err)
 	}
