@@ -130,4 +130,21 @@ func resume(s *discordgo.Session, event *discordgo.Resumed) {
 	if err != nil {
 		log.Printf("Error in resume (this is awkward):\n%v\n", err)
 	}
+	
+	// set the status to "watching you"
+	i := 0
+	usd := discordgo.UpdateStatusData{
+		IdleSince: &i,
+		AFK: false,
+		Status: "online",
+		Game: &discordgo.Game {
+			Name: "you OwO",
+			Type: discordgo.GameTypeWatching,
+		},
+	}
+
+	err = s.UpdateStatusComplex(usd)
+	if err != nil {
+		log.Printf("Error in resume (this is awkward):\n%v\n", err)
+	}
 }
