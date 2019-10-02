@@ -39,7 +39,7 @@ var CommandCategories = map[string]*struct{
 }
 
 // go iterates over maps (using range()) in a random order, so this is used to combat that
-var CmdCatOrder = []string{ "fun", "text", "twitch", "util" }
+var CmdCatOrder = []string{ "fun", "text", "util" }
 
 var Commands = []Command {
 	{
