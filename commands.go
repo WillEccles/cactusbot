@@ -36,9 +36,6 @@ var CommandCategories = map[string]*struct{
 	"util": {
 		Title: ":wrench: Utility",
 	},
-	"twitch": {
-		Title: "<:CB_Twitch:568522608371433493> Twitch",
-	},
 }
 
 // go iterates over maps (using range()) in a random order, so this is used to combat that
@@ -194,54 +191,6 @@ var Commands = []Command {
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+sowner`),
 		Handler: sownerhandler,
 	},
-	{
-		Name: "ttv",
-		Args: []CommandArg {
-			{
-				Title: "stream",
-				Required: true,
-			},
-		},
-		Description: "Gets the stats/current status of a Twitch stream.",
-		Examples: []string{
-			"`c ttv shroud` returns an embed containing Shroud's game, viewer count, etc.",
-		},
-		Aliases: []string {
-			"ttvcheck",
-			"twitch",
-			"ttvstatus",
-			"twitchstatus",
-		},
-		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(ttv|twitch|ttvstatus|twitchstatus)\s+[A-Z0-9_]{4,25}\s*$`),
-		Category: "twitch",
-		Handler: ttvhandler,
-	},
-	{
-		Name: "ttvfollowage",
-		Args: []CommandArg {
-			{
-				Title: "user",
-				Required: true,
-			},
-			{
-				Title: "channel",
-				Required: true,
-			},
-		},
-		Description: "Finds out how long `user` has been following `channel`.",
-		Examples: []string{
-			"`c ttvfollowage shroud timthetatman` will tell you how long shroud has followed timthetatman.",
-		},
-		Aliases: []string {
-			"ttvf",
-			"twitchfollowage",
-			"tfollow",
-			"tfage",
-		},
-		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(ttvf(ollowage)?|twitchfollowage|tfollow|tfage)\s+[A-Z0-9_]{4,25}\s+[A-Z0-9_]{4,25}\s*$`),
-		Category: "twitch",
-		Handler: ttvfollowagehandler,
-	},
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {
@@ -258,10 +207,6 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 
 	for _, catname := range(CmdCatOrder) {
 		cat := CommandCategories[catname]
-		if cat.Title == "Twitch" && Config.TwitchClientID == "" {
-			// ignore twitch commands if we can't use them
-			continue
-		}
 
 		newfield := discordgo.MessageEmbedField{
 			Name: cat.Title,
@@ -283,10 +228,6 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 
 func InitCommandEmbeds(m map[string]*discordgo.MessageEmbed) {
 	for _, cmd := range(Commands) {
-		if Config.TwitchClientID == "" && cmd.Category == "twitch" {
-			continue
-		}
-
 		m[cmd.Name] = &discordgo.MessageEmbed{}
 		m[cmd.Name].Title = "`" + cmd.Name
 		for _, arg := range(cmd.Args) {

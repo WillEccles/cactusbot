@@ -14,7 +14,6 @@ type Configuration struct {
 	DebugChannel	string
 	AdminIDs		[]string
 	ControllerID	string
-	TwitchClientID	string
 }
 
 func LoadConfig() Configuration {

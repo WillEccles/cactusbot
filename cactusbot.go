@@ -55,9 +55,6 @@ func main() {
 	if Config.ControllerID == "" {
 		log.Println("ControllerID not found in config.json, assuming no controller.")
 	}
-	if Config.TwitchClientID == "" {
-		log.Println("TwitchClientID not found in config.json, twitch commands will be disabled.")
-	}
 
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {
@@ -112,10 +109,6 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	for _, cmd := range(Commands) {
-		// if client id for twitch is not specified, ignore twitch commands
-		if cmd.Category == "twitch" && Config.TwitchClientID == "" {
-			continue
-		}
 		if cmd.Pattern.MatchString(m.Content) {
 			cmd.Handle(m, s)
 			break
