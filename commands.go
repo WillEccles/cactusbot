@@ -191,6 +191,13 @@ var Commands = []Command {
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+sowner`),
 		Handler: sownerhandler,
 	},
+    {
+        Name: "echo",
+        Description: "Echos back what you say.",
+        AdminOnly: true,
+        Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+\S+`),
+        Handler: echohandler,
+    },
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {

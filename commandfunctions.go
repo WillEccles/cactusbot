@@ -21,6 +21,15 @@ func oodlehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	}
 }
 
+func echohandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    re := regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+`)
+    cleanmsg := re.ReplaceAllString(msg.Content, "")
+	_, err := s.ChannelMessageSend(msg.ChannelID, cleanmsg)
+	if err != nil {
+		log.Printf("Error in echohandler:\n%v\n", err)
+	}
+}
+
 func oodlettshandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	re := regexp.MustCompile(`(?i)^c(actus)?\s+oodletts\s+`)
 	cleanmsg := re.ReplaceAllString(msg.Content, "")
