@@ -15,7 +15,11 @@ import (
 func oodlehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	re := regexp.MustCompile(`(?i)^c(actus)?\s+oodle\s+`)
 	cleanmsg := re.ReplaceAllString(msg.Content, "")
-	_, err := s.ChannelMessageSend(msg.ChannelID, oodle(cleanmsg))
+    m := oodle(cleanmsg)
+    if len(m) > 2000 {
+        m = "Your message is too long. Sorry!"
+    }
+	_, err := s.ChannelMessageSend(msg.ChannelID, m)
 	if err != nil {
 		log.Printf("Error in oodlehandler:\n%v\n", err)
 	}
@@ -24,6 +28,9 @@ func oodlehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 func echohandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
     re := regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+`)
     cleanmsg := re.ReplaceAllString(msg.Content, "")
+    if len(cleanmsg) > 2000 {
+        cleanmsg = "Your message is too long. Sorry!"
+    }
 	_, err := s.ChannelMessageSend(msg.ChannelID, cleanmsg)
 	if err != nil {
 		log.Printf("Error in echohandler:\n%v\n", err)
@@ -40,7 +47,11 @@ func oodlettshandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 		_, err = s.ChannelMessageSend(msg.ChannelID, "Something went wrong, please try again later. Sorry! :(")
 	} else {
 		if (perms & discordgo.PermissionSendTTSMessages) > 0 {
-			_, err = s.ChannelMessageSendTTS(msg.ChannelID, oodle(cleanmsg))
+            cleanmsg = oodle(cleanmsg)
+            if len(cleanmsg) > 2000 {
+                cleanmsg = "Your message is too long. Sorry!"
+            }
+			_, err = s.ChannelMessageSendTTS(msg.ChannelID, cleanmsg)
 		} else {
 			_, err = s.ChannelMessageSend(msg.ChannelID, fmt.Sprintf("Sorry <@%v>, you don't have permission to use TTS. Here's a normal one:\n%v", msg.Author.ID, oodle(cleanmsg)))
 
@@ -133,7 +144,11 @@ func rollhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 func blocklettershandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	re := regexp.MustCompile(`(?i)^c(actus)?\s+bl(ockletters)?\s+`)
 	cleanmsg := re.ReplaceAllString(msg.Content, "")
-	_, err := s.ChannelMessageSend(msg.ChannelID, texttoemotes(cleanmsg))
+    cleanmsg = texttoemotes(cleanmsg)
+    if len(cleanmsg) > 2000 {
+        cleanmsg = "Your message is too long. Sorry!"
+    }
+	_, err := s.ChannelMessageSend(msg.ChannelID, cleanmsg)
 	if err != nil {
 		log.Printf("Error in blocklettershandler:\n%v\n", err)
 	}
