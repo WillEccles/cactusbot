@@ -55,6 +55,9 @@ func main() {
 	if Config.ControllerID == "" {
 		log.Println("ControllerID not found in config.json, assuming no controller.")
 	}
+    if Config.LogChannel == "" || Config.LogWebhookID == "" || Config.LogWebhookToken == "" {
+        log.Println("Channel logging not enabled.")
+    }
 
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {
@@ -114,6 +117,29 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			break
 		}
 	}
+
+    if !(Config.LogChannel == "" || Config.LogWebhookID == "" || Config.LogWebhookToken == "") {
+        if m.ChannelID == Config.LogChannel {
+            whp := discordgo.WebhookParams{
+                Content: m.Content,
+                Username: m.Author.Username,
+                AvatarURL: m.Author.AvatarURL(""),
+            }
+            if len(m.Attachments) > 0 {
+                for _, a := range m.Attachments {
+                    whp.Embeds = append(whp.Embeds, &discordgo.MessageEmbed{
+                        Image: &discordgo.MessageEmbedImage{
+                            URL: a.URL,
+                        },
+                    })
+                }
+            }
+            err := s.WebhookExecute(Config.LogWebhookID, Config.LogWebhookToken, false, &whp)
+            if err != nil {
+                log.Println("Error in messageCreate:\n%v\n", err)
+            }
+        }
+    }
 }
 
 func connect(s *discordgo.Session, event *discordgo.Connect) {

@@ -9,17 +9,20 @@ import (
 
 // omited from types.go, makes more sense to be in here
 type Configuration struct {
-	DiscordToken	string
-	DiscordClientID	string
-	DebugChannel	string
-	AdminIDs		[]string
-	ControllerID	string
+    DiscordToken	string
+    DiscordClientID	string
+    DebugChannel	string
+    AdminIDs		[]string
+    ControllerID	string
+    LogChannel      string
+    LogWebhookID    string
+    LogWebhookToken string
 }
 
 func LoadConfig() Configuration {
 	file, err := os.Open("config.json")
 	if err != nil {
-		WriteNewConfig()
+        log.Printf("Error loading config:\n%v\n", err)
 		return Configuration{}
 	}
 	defer file.Close()
