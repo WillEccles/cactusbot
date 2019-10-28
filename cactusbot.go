@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -23,6 +24,10 @@ var Config Configuration
 
 var CommandEmbeds map[string]*discordgo.MessageEmbed
 
+var DadMatcher = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+\S`)
+var DadReplacer = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+`)
+var DadEnabler = regexp.MustCompile(`(?i)^c\s+dad\s+(on|off)`)
+var EnableDad = false
 
 func init() {
 	log.SetPrefix("[Cactusbot] ")
@@ -106,10 +111,32 @@ func ready(s *discordgo.Session, event *discordgo.Ready) {
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// ignore the bot's own messages
+	// ignore bots' messages
 	if m.Author.Bot {
 		return
 	}
+
+    if Config.IsAdmin(m.Author.ID) && DadEnabler.MatchString(m.Content) {
+        parts := strings.Split(m.Content, " ")
+        parts[2] = strings.ToLower(parts[2])
+        if parts[2] == "off" {
+            EnableDad = false
+        } else if parts[2] == "on" {
+            EnableDad = true
+        }
+        _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("```golang\nEnableDad = %t```", EnableDad))
+        if err != nil {
+            log.Printf("Error in messageCreate:\n%v\n", err)
+        }
+    }
+
+    if EnableDad && DadMatcher.MatchString(m.Content) {
+        response := DadReplacer.ReplaceAllString(m.Content, "")
+        _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Hi %s, I'm cactusbot", response))
+        if err != nil {
+            log.Printf("Error in messageCreate:\n%v\n", err)
+        }
+    }
 
 	for _, cmd := range(Commands) {
 		if cmd.Pattern.MatchString(m.Content) {
