@@ -150,7 +150,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if !(Config.LogChannel == "" || Config.LogWebhookID == "" || Config.LogWebhookToken == "") {
         if m.ChannelID == Config.LogChannel {
             whp := discordgo.WebhookParams{
-                Content: m.Content,
+                Content: strings.ReplaceAll(m.Content, "@", ""),
                 Username: m.Author.Username,
                 AvatarURL: m.Author.AvatarURL(""),
             }
