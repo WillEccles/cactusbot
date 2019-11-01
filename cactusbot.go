@@ -25,7 +25,7 @@ var Config Configuration
 var CommandEmbeds map[string]*discordgo.MessageEmbed
 
 var DadMatcher = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+\S`)
-var DadReplacer = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+`)
+var DadReplacer = regexp.MustCompile(`(?i)(^i('?m|\s+am)\s+)|@everyone`)
 var DadEnabler = regexp.MustCompile(`(?i)^c\s+dad\s+(on|off)`)
 var EnableDad = false
 
