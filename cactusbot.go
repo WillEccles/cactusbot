@@ -131,7 +131,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
 
     if EnableDad && DadMatcher.MatchString(m.Content) {
-        response := strings.ReplaceAll(DadReplacer.ReplaceAllString(m.Content, ""), "@everyone", "")
+        response := strings.ReplaceAll(DadReplacer.ReplaceAllString(m.Content, ""), "@everyone", "everyone")
         _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Hi %s, I'm cactusbot", response))
         if err != nil {
             log.Printf("Error in messageCreate:\n%v\n", err)
