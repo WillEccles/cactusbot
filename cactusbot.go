@@ -25,7 +25,7 @@ var Config Configuration
 var CommandEmbeds map[string]*discordgo.MessageEmbed
 
 var DadMatcher = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+\S`)
-var DadReplacer = regexp.MustCompile(`(?i)(^i('?m|\s+am)\s+)|@(?=everyone)`)
+var DadReplacer = regexp.MustCompile(`(?i)^i('?m|\s+am)\s+`)
 var DadEnabler = regexp.MustCompile(`(?i)^c\s+dad\s+(on|off)`)
 var EnableDad = false
 
@@ -131,7 +131,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     }
 
     if EnableDad && DadMatcher.MatchString(m.Content) {
-        response := DadReplacer.ReplaceAllString(m.Content, "")
+        response := strings.ReplaceAll(DadReplacer.ReplaceAllString(m.Content, ""), "@everyone", "")
         _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Hi %s, I'm cactusbot", response))
         if err != nil {
             log.Printf("Error in messageCreate:\n%v\n", err)
