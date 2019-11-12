@@ -134,7 +134,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
     if EnableDad && DadMatcher.MatchString(m.Content) {
         response := DadReplacer.ReplaceAllString(m.Content, "")
         response = DadSanitizer.ReplaceAllString(response, "$1")
-        _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Hi %s, I'm cactusbot", response))
+        _, err := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Hi %s, I'm cactusbot!", response))
         if err != nil {
             log.Printf("Error in messageCreate:\n%v\n", err)
         }
