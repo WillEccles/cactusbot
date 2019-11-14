@@ -64,6 +64,9 @@ func main() {
     if Config.LogChannel == "" || Config.LogWebhookID == "" || Config.LogWebhookToken == "" {
         log.Println("Channel logging not enabled.")
     }
+    if Config.LeagueToken == "" {
+        log.Println("League token not found; 'lol' commands will be disabled.")
+    }
 
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)
 	if err != nil {

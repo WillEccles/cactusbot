@@ -2,38 +2,37 @@ package main
 
 import (
 	"encoding/json"
-	"os"
 	"log"
 	"io/ioutil"
 )
 
 // omited from types.go, makes more sense to be in here
 type Configuration struct {
-    DiscordToken	string
-    DiscordClientID	string
-    DebugChannel	string
-    AdminIDs		[]string
-    ControllerID	string
-    LogChannel      string
-    LogWebhookID    string
-    LogWebhookToken string
+    DiscordToken	string      `json:",omitempty"`
+    DiscordClientID	string      `json:",omitempty"`
+    DebugChannel	string      `json:",omitempty"`
+    AdminIDs		[]string    `json:",omitempty"`
+    ControllerID	string      `json:",omitempty"`
+    LogChannel      string      `json:",omitempty"`
+    LogWebhookID    string      `json:",omitempty"`
+    LogWebhookToken string      `json:",omitempty"`
+    LeagueToken     string      `json:",omitempty"`
 }
 
 func LoadConfig() Configuration {
-	file, err := os.Open("config.json")
+    var conf Configuration
+    fcontents, err := ioutil.ReadFile("config.json")
 	if err != nil {
         log.Printf("Error loading config:\n%v\n", err)
 		return Configuration{}
 	}
-	defer file.Close()
 	
-	decoder := json.NewDecoder(file)
-	conf := Configuration{}
-	err = decoder.Decode(&conf)
-	if err != nil {
-		log.Println(err)
-	}
-
+    err = json.Unmarshal(fcontents, &conf)
+    if err != nil {
+        log.Printf("Error parsing json config:\n%v\n", err)
+        return Configuration{}
+    }
+	
 	return conf
 }
 
