@@ -198,6 +198,13 @@ var Commands = []Command {
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+\S+`),
         Handler: echohandler,
     },
+    {
+        Name: "lol",
+        Description: "Looks up league-related things.",
+        AdminOnly: true, // TODO
+        Pattern: regexp.MustCompile(`(?i)^c\s+lol\s+(profile|status)\s+\S+`),
+        Handler: lolhandler,
+    },
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {

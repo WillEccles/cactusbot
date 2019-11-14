@@ -24,6 +24,9 @@ var Config Configuration
 
 var CommandEmbeds map[string]*discordgo.MessageEmbed
 
+var LeagueData LeagueHelper
+var EnableLOL = true
+
 var DadMatcher = regexp.MustCompile(`(?i)^i(['’]?m|\s+am)\s+\S`)
 var DadReplacer = regexp.MustCompile(`(?i)^i(['’]?m|\s+am)\s+`)
 var DadSanitizer = regexp.MustCompile(`(?i)@+(everyone|here)`)
@@ -34,7 +37,16 @@ func init() {
 	log.SetPrefix("[Cactusbot] ")
 	log.Println("init: loading config")
 	Config = LoadConfig()
-	go WriteConfig(Config) // if config is out of date, this updates it
+	//go WriteConfig(Config) // if config is out of date, this updates it
+    if Config.LeagueToken == "" {
+        log.Println("League token not found; 'lol' commands will be disabled.")
+    } else {
+        if !LeagueData.Init(Config.LeagueToken) {
+            // TODO disable league commands
+            log.Println("Error initializing league data; league commands will be disabled")
+            EnableLOL = false
+        }
+    }
 	log.Println("init: creating help embeds")
 	InitHelpEmbed(&HelpEmbed)
 	CommandEmbeds = make(map[string]*discordgo.MessageEmbed)
@@ -63,9 +75,6 @@ func main() {
 	}
     if Config.LogChannel == "" || Config.LogWebhookID == "" || Config.LogWebhookToken == "" {
         log.Println("Channel logging not enabled.")
-    }
-    if Config.LeagueToken == "" {
-        log.Println("League token not found; 'lol' commands will be disabled.")
     }
 
 	dg, err := discordgo.New("Bot " + Config.DiscordToken)

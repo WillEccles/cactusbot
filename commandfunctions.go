@@ -300,3 +300,37 @@ func xkcdhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 		log.Printf("Error in xkcdhandler:\n%v\n", err)
 	}
 }
+
+var lolstat = regexp.MustCompile(`(?i)^c\s+lol\s+status\s+`)
+var lolprofile = regexp.MustCompile(`(?i)^c\s+lol\s+profile\s+`)
+
+func lolhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    if lolprofile.MatchString(msg.Content) {
+        embed := LeagueData.GetSummonerEmbed(lolprofile.ReplaceAllString(msg.Content, ""))
+        _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+        if err != nil {
+            log.Printf("Error in lolhandler:\n%v\n", err)
+        }
+        /*
+        lvl, err := GetSummonerLevel(lolprofile.ReplaceAllString(msg.Content, ""))
+        if err != "" {
+            embed := &discordgo.MessageEmbed{
+                Color: 0xCC0000,
+                Description: err,
+            }
+            _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+            if err != nil {
+                log.Printf("Error in lolhandler:\n%v\n", err)
+            }
+        } else {
+            embed := &discordgo.MessageEmbed{
+                Color: s.State.UserColor(s.State.User.ID, msg.ChannelID),
+                Description: strconv.FormatInt(lvl, 10),
+            }
+            _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+            if err != nil {
+                log.Printf("Error in lolhandler:\n%v\n", err)
+            }
+        }*/
+    }
+}
