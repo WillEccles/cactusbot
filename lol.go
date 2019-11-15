@@ -21,9 +21,9 @@ const (
     // takes summoner name, URL encoded (obviously)
     SUMMONER = "/lol/summoner/v4/summoners/by-name/%s"
     // takes summonerID
-    ALL_CHAMPION_MASTERY = "/lol/champion-mastery/v4/champion-masteries/by-summoner/%s"
+    ALL_CHAMPION_MASTERY = "/lol/champion-mastery/v4/champion-masteries/by-summoner/%v"
     // takes championID; tack onto end of ALL_CHAMPION_MASTERY
-    BY_CHAMPION = "/by-champion/%s"
+    BY_CHAMPION = "/by-champion/%v"
     // takes summonerID
     MASTERY_SCORE = "/lol/champion-mastery/v4/scores/by-summoner/%v"
     // takes a version and profile icon ID
@@ -87,6 +87,12 @@ func loadChampionsFile() *ChampionFile {
         log.Printf("Error parsing championFull.json:\n%v\nPlease delete the file and run the bot again.\n", err)
         return nil
     }
+
+    nmap := make(map[string]*ChampionDTO)
+    for champ, champdata := range(cfile.Data) {
+        nmap[strings.ToLower(strings.ReplaceAll(champ, "'", ""))] = champdata
+    }
+    cfile.Data = nmap
 	
 	return cfile
 }
@@ -96,7 +102,12 @@ func getLatestVersion() string {
 
     resp, err := http.Get(VERSIONS_URL)
     if err != nil {
-        if resp.StatusCode != 200 && resp.StatusCode != 404 {
+        if resp != nil {
+            if resp.StatusCode != 200 && resp.StatusCode != 404 {
+                log.Printf("Error in getLatestVersion:\n%v\n", err)
+                return ""
+            }
+        } else {
             log.Printf("Error in getLatestVersion:\n%v\n", err)
             return ""
         }
@@ -170,7 +181,7 @@ func (helper *LeagueHelper) UpdateData() (bool, string) {
         log.Printf("Successfully updated League data to %v\n", latestver)
         return true, ""
     } else {
-        log.Printf("League data is up-to-date. (%v)\n", helper.Version)
+        log.Printf("League data is up-to-date (version %v)\n", helper.Version)
         return false, ""
     }
 
@@ -180,7 +191,8 @@ func (helper *LeagueHelper) UpdateData() (bool, string) {
 // should only be run in a separate goroutine
 func (helper *LeagueHelper) UpdateRoutine() {
     for {
-        time.Sleep(
+        time.Sleep(12 * time.Hour)
+        helper.UpdateData()
     }
 }
 
@@ -192,6 +204,29 @@ func (s *Summoner) GetIconURL(version string) string {
     return fmt.Sprintf(PROFILE_ICON, version, s.ProfileIconID)
 }
 
+// returns -1 if not found
+func (helper *LeagueHelper) getChampionIDByName(name string) int {
+    sname := strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(name), "'", ""), " ", "")
+    for k, v := range(helper.ChampionData.Data) {
+        if k == sname {
+            idval, _ := strconv.Atoi(v.Key)
+            return idval
+        }
+    }
+    return -1
+}
+
+// returns "" if not found
+func (helper *LeagueHelper) getChampionNameByID(id int) string {
+    for _, v := range(helper.ChampionData.Data) {
+        key, _ := strconv.Atoi(v.Key)
+        if key == id {
+            return v.Name
+        }
+    }
+    return ""
+}
+
 func MakeErrorEmbed(err string) *discordgo.MessageEmbed {
     return &discordgo.MessageEmbed{
         Color: 0xCC0000,
@@ -200,8 +235,6 @@ func MakeErrorEmbed(err string) *discordgo.MessageEmbed {
 }
 
 func (helper LeagueHelper) GetSummoner(summonername string) (*Summoner, string) {
-    helper.Lock.Lock()
-    defer helper.Lock.Unlock()
     requrl := fmt.Sprintf(API_URL+SUMMONER, url.QueryEscape(summonername)) + "?api_key=" + helper.Token
     requrl = strings.ReplaceAll(requrl, "+", "%20")
 
@@ -231,18 +264,21 @@ func (helper LeagueHelper) GetSummoner(summonername string) (*Summoner, string) 
 }
 
 func (helper LeagueHelper) GetMasteryScore(summonerID string) (int, string) {
-    helper.Lock.Lock()
-    defer helper.Lock.Unlock()
     requrl := fmt.Sprintf(API_URL+MASTERY_SCORE + "?api_key=" + helper.Token, summonerID)
     
     waserr := false
     resp, err := http.Get(requrl)
     if err != nil {
-        if resp.StatusCode != 200 && resp.StatusCode != 404 {
+        if resp != nil {
+            if resp.StatusCode != 200 && resp.StatusCode != 404 {
+                log.Printf("Error in GetMasteryScore:\n%v\n", err)
+                return -1, "Error retrieving data from API"
+            } else {
+                waserr = true
+            }
+        } else {
             log.Printf("Error in GetMasteryScore:\n%v\n", err)
             return -1, "Error retrieving data from API"
-        } else {
-            waserr = true
         }
     }
     defer resp.Body.Close()
@@ -273,7 +309,109 @@ func (helper LeagueHelper) GetMasteryScore(summonerID string) (int, string) {
     }
 }
 
-func (helper LeagueHelper) GetSummonerEmbed(summonername string) *discordgo.MessageEmbed {
+func (helper LeagueHelper) GetSummonerMasteries(summonerID string) (ChampionMasteries, string) {
+    requrl := fmt.Sprintf(API_URL+ALL_CHAMPION_MASTERY+"?api_key="+helper.Token, summonerID)
+    
+    waserr := false
+    resp, err := http.Get(requrl)
+    if err != nil {
+        if resp != nil {
+            if resp.StatusCode != 200 && resp.StatusCode != 404 {
+                log.Printf("Error in GetSummonerMasteries:\n%v\n", err)
+                return nil, "Error retrieving data from API"
+            } else {
+                waserr = true
+            }
+        } else {
+            log.Printf("Error in GetSummonerMasteries:\n%v\n", err)
+            return nil, "Error retrieving data from API"
+        }
+    }
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Printf("Error in GetSummonerMasteries:\n%v\n", err)
+        return nil, "Error reading API data"
+    }
+
+    if waserr {
+        lerr := &GenericLeagueError{}
+        err = json.Unmarshal(body, lerr)
+        if err != nil {
+            log.Println("Error in GetSummonerMasteries:\n%v\n", err)
+            return nil, "Error parsing API data"
+        }
+        return nil, lerr.Status.Message
+    }
+
+    var m ChampionMasteries
+
+    err = json.Unmarshal(body, &m)
+    if err != nil {
+        log.Println("Error in GetSummonerMasteries:\n%v\n", err)
+        return nil, "Error parsing API data"
+    }
+
+    return m, ""
+    
+}
+
+func (helper LeagueHelper) GetSummonerMasteryForChampion(summonerID, champ string) (*ChampionMasteryDTO, string) {
+    cid := helper.getChampionIDByName(champ)
+    if cid == -1 {
+        return nil, "Champion not found: " + champ
+    }
+
+    requrl := fmt.Sprintf(API_URL+ALL_CHAMPION_MASTERY+BY_CHAMPION + "?api_key=" + helper.Token, summonerID, cid)
+   
+    waserr := false
+    resp, err := http.Get(requrl)
+    if err != nil {
+        if resp != nil {
+            if resp.StatusCode != 200 && resp.StatusCode != 404 {
+                log.Printf("Error in GetSummonerMasteryForChampion:\n%v\n", err)
+                return nil, "Error retrieving data from API"
+            } else {
+                waserr = true
+            }
+        } else {
+            log.Printf("Error in GetSummonerMasteryForChampion:\n%v\n", err)
+            return nil, "Error retrieving data from API"
+        }
+    }
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Printf("Error in GetSummonerMasteryForChampion\n%v\n", err)
+        return nil, "Error reading API data"
+    }
+
+    if waserr {
+        lerr := &GenericLeagueError{}
+        err = json.Unmarshal(body, lerr)
+        if err != nil {
+            log.Println("Error in GetSummonerMasteryForChampion:\n%v\n", err)
+            return nil, "Error parsing API data"
+        }
+        return nil, lerr.Status.Message
+    }
+
+    mastery := &ChampionMasteryDTO{}
+
+    err = json.Unmarshal(body, mastery)
+    if err != nil {
+        log.Println("Error in GetSummonerMasteryForChampion:\n%v\n", err)
+        return nil, "Error parsing API data"
+    }
+
+    return mastery, ""
+}
+
+func (helper *LeagueHelper) GetSummonerEmbed(summonername string) *discordgo.MessageEmbed {
+    helper.Lock.Lock()
+    defer helper.Lock.Unlock()
     embed := &discordgo.MessageEmbed{}
 
     summoner, err := helper.GetSummoner(summonername)
@@ -282,7 +420,7 @@ func (helper LeagueHelper) GetSummonerEmbed(summonername string) *discordgo.Mess
         return MakeErrorEmbed(err)
     }
     if summoner.Status != nil {
-        log.Printf("Error in GetSummonerEmbed:\n%v\n", summoner.Status.Message)
+        //log.Printf("Error in GetSummonerEmbed:\n%v\n", summoner.Status.Message)
         return MakeErrorEmbed(summoner.Status.Message)
     }
 
@@ -311,4 +449,100 @@ func (helper LeagueHelper) GetSummonerEmbed(summonername string) *discordgo.Mess
     })
 
     return embed
+}
+
+func (helper *LeagueHelper) GetSummonerMasteriesEmbed(summonername string) *discordgo.MessageEmbed {
+    helper.Lock.Lock()
+    defer helper.Lock.Unlock()
+    embed := &discordgo.MessageEmbed{}
+
+    summoner, err := helper.GetSummoner(summonername)
+    if err != "" {
+        log.Printf("Error in GetSummonerMasteriesEmbed:\n%v\n", err)
+        return MakeErrorEmbed(err)
+    }
+    if summoner.Status != nil {
+        //log.Printf("Error in GetSummonerEmbed:\n%v\n", summoner.Status.Message)
+        return MakeErrorEmbed(summoner.Status.Message)
+    }
+    
+    mastery, err := helper.GetMasteryScore(summoner.ID)
+    if err != "" {
+        return MakeErrorEmbed(err)
+    }
+
+    masteries, err := helper.GetSummonerMasteries(summoner.ID)
+    if err != "" {
+        return MakeErrorEmbed(err)
+    }
+
+    totalpoints := 0
+    for _, m := range masteries {
+        totalpoints += m.ChampionPoints
+    }
+
+    embed.Color = 0xD13739
+    embed.Thumbnail = &discordgo.MessageEmbedThumbnail{
+        URL: summoner.GetIconURL(helper.Version),
+    }
+    embed.Title = "Summoner Masteries: " + summoner.Name
+    embed.Description = fmt.Sprintf("**Mastery level: %v**\nTotal mastery points: %v", mastery, totalpoints)
+    for i := 0; i < 5; i++ {
+        embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+            Name: helper.getChampionNameByID(masteries[i].ChampionID),
+            Value: fmt.Sprintf("Level %v, %vpts", masteries[i].ChampionLevel, masteries[i].ChampionPoints),
+        })
+    }
+
+    return embed
+}
+
+func (helper *LeagueHelper) GetSummonerMasteryEmbed(summonername, champname string) *discordgo.MessageEmbed {
+    helper.Lock.Lock()
+    defer helper.Lock.Unlock()
+    embed := &discordgo.MessageEmbed{}
+
+    summoner, err := helper.GetSummoner(summonername)
+    if err != "" {
+        log.Printf("Error in GetSummonerMasteriesEmbed:\n%v\n", err)
+        return MakeErrorEmbed(err)
+    }
+    if summoner.Status != nil {
+        //log.Printf("Error in GetSummonerEmbed:\n%v\n", summoner.Status.Message)
+        return MakeErrorEmbed(summoner.Status.Message)
+    }
+
+    mastery, err := helper.GetSummonerMasteryForChampion(summoner.ID, champname)
+    if err != "" {
+        return MakeErrorEmbed(err)
+    }
+
+    // get details for champ
+    champ := helper.ChampionData.Data[strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(champname), "'", ""), " ", "")]
+
+    lastplaytime := time.Unix(mastery.LastPlayTime / 1000, 0)
+    lastplaytimestamp := lastplaytime.Format(time.RFC1123)
+
+    embed.Color = 0xD13739
+    embed.Thumbnail = &discordgo.MessageEmbedThumbnail{
+        URL: champ.Image.GetURL(helper.Version),
+    }
+    embed.Title = "Champion Mastery: " + champ.Name
+    embed.Description = "For summoner " + summoner.Name
+    embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+        Name: "Level",
+        Value: fmt.Sprintf("%v", mastery.ChampionLevel),
+    }, &discordgo.MessageEmbedField{
+        Name: "Points",
+        Value: fmt.Sprintf("%v", mastery.ChampionPoints),
+    }, &discordgo.MessageEmbedField{
+        Name: "Tokens",
+        Value: fmt.Sprintf("%v", mastery.TokensEarned),
+    }, &discordgo.MessageEmbedField{
+        Name: "Last Played",
+        Value: lastplaytimestamp,
+    })
+
+    return embed
+    
 }

@@ -37,7 +37,7 @@ type ChampionMasteryDTO struct {
     ChestGranted            bool    `json:"chestGranted,omitempty"`
     ChampionLevel           int     `json:"championLevel,omitempty"`
     ChampionPoints          int     `json:"championPoints,omitempty"`
-    ChampionID              int64   `json:"championId,omitempty"`
+    ChampionID              int     `json:"championId,omitempty"`
     PointsUntilNextLevel    int64   `json:"championPointsUntilNextLevel,omitempty"`
     LastPlayTime            int64   `json:"lastPlayTime,omitempty"`
     TokensEarned            int     `json:"tokensEarned,omitempty"`
@@ -62,6 +62,7 @@ type ChampionFile struct {
 type ChampionDTO struct {
     Version     string      `json:"version,omitempty"`
     ID          string      `json:"id,omitempty"`
+    Key         string      `json:"key,omitempty"`
     Name        string      `json:"name,omitempty"`
     Title       string      `json:"title,omitempty"`
     Blurb       string      `json:"blurb,omitempty"`

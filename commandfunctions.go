@@ -301,36 +301,36 @@ func xkcdhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 	}
 }
 
-var lolstat = regexp.MustCompile(`(?i)^c\s+lol\s+status\s+`)
-var lolprofile = regexp.MustCompile(`(?i)^c\s+lol\s+profile\s+`)
+var lolstat = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+status\s+`)
+var lolprofile = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+p(rofile)?\s+`)
+var lolmasteries = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+m(astery)?\s+`)
 
-func lolhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
-    if lolprofile.MatchString(msg.Content) {
-        embed := LeagueData.GetSummonerEmbed(lolprofile.ReplaceAllString(msg.Content, ""))
+func lolprofilehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    embed := LeagueData.GetSummonerEmbed(lolprofile.ReplaceAllString(msg.Content, ""))
+    _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+    if err != nil {
+        log.Printf("Error in lolprofilehandler:\n%v\n", err)
+    }
+}
+
+func lolmasteryhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    args := lolmasteries.ReplaceAllString(msg.Content, "")
+    argsplit := strings.Split(args, " ")
+    if len(argsplit) == 1 {
+        embed := LeagueData.GetSummonerMasteriesEmbed(argsplit[0])
         _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
         if err != nil {
-            log.Printf("Error in lolhandler:\n%v\n", err)
+            log.Printf("Error in lolmasteryhandler:\n%v\n", err)
         }
-        /*
-        lvl, err := GetSummonerLevel(lolprofile.ReplaceAllString(msg.Content, ""))
-        if err != "" {
-            embed := &discordgo.MessageEmbed{
-                Color: 0xCC0000,
-                Description: err,
-            }
-            _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
-            if err != nil {
-                log.Printf("Error in lolhandler:\n%v\n", err)
-            }
-        } else {
-            embed := &discordgo.MessageEmbed{
-                Color: s.State.UserColor(s.State.User.ID, msg.ChannelID),
-                Description: strconv.FormatInt(lvl, 10),
-            }
-            _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
-            if err != nil {
-                log.Printf("Error in lolhandler:\n%v\n", err)
-            }
-        }*/
+    } else {
+        champname := ""
+        for i := 1; i < len(argsplit); i++ {
+            champname += argsplit[i]
+        }
+        embed := LeagueData.GetSummonerMasteryEmbed(argsplit[0], champname)
+        _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+        if err != nil {
+            log.Printf("Error in lolmasteryhandler:\n%v\n", err)
+        }
     }
 }

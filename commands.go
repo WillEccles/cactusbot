@@ -36,12 +36,16 @@ var CommandCategories = map[string]*struct{
 	"util": {
 		Title: ":wrench: Utility",
 	},
+    "lol": {
+        Title: "<:CB_LOL:644599238839369769> League of Legends",
+    },
 }
 
 // go iterates over maps (using range()) in a random order, so this is used to combat that
-var CmdCatOrder = []string{ "fun", "text", "util" }
+var CmdCatOrder = []string{ "fun", "text", "lol", "util" }
 
 var Commands = []Command {
+    /* Text Commands */
 	{
 		Name: "oodle",
 		Args: []CommandArg {
@@ -73,6 +77,44 @@ var Commands = []Command {
 		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+oodletts\s+.*[aeiou].*`),
 		Category: "text",
 		Handler: oodlettshandler,
+	},
+	{
+		Name: "blockletters",
+		Args: []CommandArg {
+			{
+				Title: "message",
+				Required: true,
+			},
+		},
+		Description: "Converts as much of `message` as possible into block letters using emoji.",
+		Examples: []string{
+			"`c blockletters Something` returns \"Something\" written in blockletters.",
+		},
+		Aliases: []string {
+			"bl",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+bl(ockletters)?\s+\S+`),
+		Category: "text",
+		Handler: blocklettershandler,
+	},
+
+    /* Fun Commands */
+	{
+		Name: "xkcd",
+		Args: []CommandArg {
+			{
+				Title: "number",
+				Required: false,
+			},
+		},
+		Description: "Gets either the most recent xkcd or the xkcd with the given `number`.",
+		Examples: []string{
+			"`c xkcd` embeds the most recent xkcd.",
+			"`c xkcd 327` embeds the Little Bobby Tables xkcd.",
+		},
+		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+xkcd(\s+\d+)?`),
+		Category: "fun",
+		Handler: xkcdhandler,
 	},
 	{
 		Name: "coinflip",
@@ -110,42 +152,61 @@ var Commands = []Command {
 		Category: "fun",
 		Handler: rollhandler,
 	},
-	{
-		Name: "blockletters",
-		Args: []CommandArg {
-			{
-				Title: "message",
-				Required: true,
-			},
-		},
-		Description: "Converts as much of `message` as possible into block letters using emoji.",
-		Examples: []string{
-			"`c blockletters Something` returns \"Something\" written in blockletters.",
-		},
-		Aliases: []string {
-			"bl",
-		},
-		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+bl(ockletters)?\s+\S+`),
-		Category: "text",
-		Handler: blocklettershandler,
-	},
-	{
-		Name: "xkcd",
-		Args: []CommandArg {
-			{
-				Title: "number",
-				Required: false,
-			},
-		},
-		Description: "Gets either the most recent xkcd or the xkcd with the given `number`.",
-		Examples: []string{
-			"`c xkcd` embeds the most recent xkcd.",
-			"`c xkcd 327` embeds the Little Bobby Tables xkcd.",
-		},
-		Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+xkcd(\s+\d+)?`),
-		Category: "fun",
-		Handler: xkcdhandler,
-	},
+    
+    /* League Commands */
+    {
+        Name: "lol profile",
+        Description: "Looks up a League of Legends summoner.",
+        Category: "lol",
+        Aliases: []string {
+            "lol p",
+            "league profile",
+            "league p",
+            "l profile",
+            "l p",
+        },
+        Args: []CommandArg {
+            {
+                Title: "summoner",
+                Required: true,
+            },
+        },
+        Examples: []string {
+            "`c lol profile miyari` returns Miyari's summoner profile.",
+        },
+        Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+p(rofile)?\s+\S+`),
+        Handler: lolprofilehandler,
+    },
+    {
+        Name: "lol mastery",
+        Description: "Looks up a summoner's top champions by mastery, or their mastery level for a specific champion. If the summoner's name contains spaces, you must remove them, unlike with `lol profile`.",
+        Category: "lol",
+        Aliases: []string {
+            "lol m",
+            "l mastery",
+            "l m",
+            "league mastery",
+            "league m",
+        },
+        Args: []CommandArg {
+            {
+                Title: "summoner",
+                Required: true,
+            },
+            {
+                Title: "champion",
+                Required: false,
+            },
+        },
+        Examples: []string {
+            "`c lol mastery miyari` will get Miyari's top 3 champions.",
+            "`c lol mastery thetinycactus aatrox` will get the tiny cactus's mastery level on Aatrox.",
+        },
+        Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+m(astery)?\s+\S+`),
+        Handler: lolmasteryhandler,
+    },
+
+    /* Util Commands */
 	{
 		Name: "invite",
 		Description: "Creates a discord invite link to add this bot to another server.",
@@ -174,6 +235,8 @@ var Commands = []Command {
 		Category: "util",
 		Handler: srchandler,
 	},
+
+    /* Admin Commands */
 	{
 		Name: "shutdown",
 		Description: "Shuts down the bot.",
@@ -198,18 +261,11 @@ var Commands = []Command {
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+\S+`),
         Handler: echohandler,
     },
-    {
-        Name: "lol",
-        Description: "Looks up league-related things.",
-        AdminOnly: true, // TODO
-        Pattern: regexp.MustCompile(`(?i)^c\s+lol\s+(profile|status)\s+\S+`),
-        Handler: lolhandler,
-    },
 }
 
 func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 	for i, cmd := range(Commands) {
-		if cmd.Category == "" {
+		if (!EnableLOL && cmd.Category == "lol") || cmd.Category == "" {
 			continue
 		}
 		CommandCategories[cmd.Category].Cmds = append(CommandCategories[cmd.Category].Cmds, &(Commands[i]))
@@ -220,9 +276,12 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 	embed.Description = "You should begin each command with `cactus` or simply `c`.\nFor example: `cactus help` or `c help`.\nFor info about a particular command, use `c help [command]`."
 
 	for _, catname := range(CmdCatOrder) {
+        if !EnableLOL && catname == "lol" {
+            continue
+        }
 		cat := CommandCategories[catname]
 
-		newfield := discordgo.MessageEmbedField{
+		newfield := &discordgo.MessageEmbedField{
 			Name: cat.Title,
 			Inline: false,
 		}
@@ -236,12 +295,15 @@ func InitHelpEmbed(embed *discordgo.MessageEmbed) {
 			newfield.Value += fmt.Sprintf("`%v` ", cmd.Name)
 		}
 
-		embed.Fields = append(embed.Fields, &newfield)
+		embed.Fields = append(embed.Fields, newfield)
 	}
 }
 
 func InitCommandEmbeds(m map[string]*discordgo.MessageEmbed) {
 	for _, cmd := range(Commands) {
+        if !EnableLOL && cmd.Category == "lol" {
+            continue
+        }
 		m[cmd.Name] = &discordgo.MessageEmbed{}
 		m[cmd.Name].Title = "`" + cmd.Name
 		for _, arg := range(cmd.Args) {

@@ -97,6 +97,10 @@ func main() {
 	defer fmt.Println("\nGoodbye.")
 	defer dg.Close() // close the session after Control-C
 
+    if EnableLOL {
+        go LeagueData.UpdateRoutine()
+    }
+
 	SigChan = make(chan os.Signal)
 	signal.Notify(SigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-SigChan
