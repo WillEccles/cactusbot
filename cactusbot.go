@@ -40,6 +40,7 @@ func init() {
 	//go WriteConfig(Config) // if config is out of date, this updates it
     if Config.LeagueToken == "" {
         log.Println("League token not found; 'lol' commands will be disabled.")
+        EnableLOL = false
     } else {
         if !LeagueData.Init(Config.LeagueToken) {
             // TODO disable league commands
