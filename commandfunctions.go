@@ -306,6 +306,13 @@ var lolprofile = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+p(rofile)?\s+`)
 var lolmasteries = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+m(astery)?\s+`)
 
 func lolprofilehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    if !EnableLOL {
+        _, err := s.ChannelMessageSend(msg.ChannelID, "Sorry, but League commands are disabled due to a configuration issue. Check back later.")
+        if err != nil {
+            log.Printf("Error in lolprofilehandler:\n%v\n", err)
+        }
+        return
+    }
     embed := LeagueData.GetSummonerEmbed(lolprofile.ReplaceAllString(msg.Content, ""))
     _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
     if err != nil {
@@ -314,6 +321,13 @@ func lolprofilehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 }
 
 func lolmasteryhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    if !EnableLOL {
+        _, err := s.ChannelMessageSend(msg.ChannelID, "Sorry, but League commands are disabled due to a configuration issue. Check back later.")
+        if err != nil {
+            log.Printf("Error in lolmasteryhandler:\n%v\n", err)
+        }
+        return
+    }
     args := lolmasteries.ReplaceAllString(msg.Content, "")
     argsplit := strings.Split(args, " ")
     if len(argsplit) == 1 {
