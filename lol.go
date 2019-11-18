@@ -11,6 +11,7 @@ import (
     "strconv"
     "time"
     "os"
+    "regexp"
 
     "github.com/bwmarrin/discordgo"
 )
@@ -522,7 +523,7 @@ func (helper *LeagueHelper) GetSummonerMasteryEmbed(summonername, champname stri
     }
 
     // get details for champ
-    champ := helper.ChampionData.Data[strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(champname), "'", ""), " ", "")]
+    champ := helper.ChampionData.Data[sanitizeChampionName(champname)]
 
     lastplaytime := time.Unix(mastery.LastPlayTime / 1000, 0)
     lastplaytimestamp := lastplaytime.Format(time.RFC1123)
@@ -549,4 +550,55 @@ func (helper *LeagueHelper) GetSummonerMasteryEmbed(summonername, champname stri
 
     return embed
     
+}
+
+var brtag = regexp.MustCompile(`(?i)(<br/?>)+`)
+var htmltag = regexp.MustCompile(`(?i)<[^<]+>`)
+func sanitizeDescription(desc string) string {
+    return htmltag.ReplaceAllString(brtag.ReplaceAllString(desc, "\n"), "")
+}
+
+func (helper *LeagueHelper) GetChampionEmbed(champname string) *discordgo.MessageEmbed {
+    embed := &discordgo.MessageEmbed{}
+    
+    cdata, found := helper.ChampionData.Data[sanitizeChampionName(champname)]
+    if !found {
+        return MakeErrorEmbed("Error: Champion not found")
+    }
+
+    embed.Color = 0xD13739
+    embed.Title = "Champion: " + cdata.Name
+    embed.Thumbnail = &discordgo.MessageEmbedThumbnail{
+        URL: cdata.Image.GetURL(helper.Version),
+    }
+    embed.Description = fmt.Sprintf("**%v**\n*", strings.Title(cdata.Title))
+    for i, t := range(cdata.Tags) {
+        if i != 0 {
+            embed.Description += ", "
+        }
+        embed.Description += t
+    }
+    embed.Description += "*"
+    embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+        Name: "Lore",
+        Value: cdata.Lore,
+    }, &discordgo.MessageEmbedField{
+        Name: "Resource",
+        Value: cdata.Resource,
+    })
+
+    spellLabels := "QWER"
+    for i, spell := range(cdata.Spells) {
+        f := &discordgo.MessageEmbedField{}
+        f.Name = fmt.Sprintf("%c: %v", spellLabels[i], spell.Name)
+        f.Value = sanitizeDescription(spell.Description)
+        embed.Fields = append(embed.Fields, f)
+    }
+
+    embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+        Name: "Passive: " + cdata.Passive.Name,
+        Value: sanitizeDescription(cdata.Passive.Description),
+    })
+
+    return embed
 }

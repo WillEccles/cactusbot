@@ -304,6 +304,7 @@ func xkcdhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
 var lolstat = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+status\s+`)
 var lolprofile = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+p(rofile)?\s+`)
 var lolmasteries = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+m(astery)?\s+`)
+var lolchamp = regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+c(hamp(ion)?)?\s+`)
 
 func lolprofilehandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
     if !EnableLOL {
@@ -346,5 +347,14 @@ func lolmasteryhandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
         if err != nil {
             log.Printf("Error in lolmasteryhandler:\n%v\n", err)
         }
+    }
+}
+
+func lolchamphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    champ := lolchamp.ReplaceAllString(msg.Content, "")
+    embed := LeagueData.GetChampionEmbed(champ)
+    _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+    if err != nil {
+        log.Printf("Error in lolchamphandler:\n%v\n", err)
     }
 }

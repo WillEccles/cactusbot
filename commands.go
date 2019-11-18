@@ -205,6 +205,32 @@ var Commands = []Command {
         Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+m(astery)?\s+\S+`),
         Handler: lolmasteryhandler,
     },
+    {
+        Name: "lol champ",
+        Description: "Gets details on a specific champion.",
+        Category: "lol",
+        Aliases: []string {
+            "lol champion",
+            "lol c",
+            "l champ",
+            "l champion",
+            "l c",
+            "league champ",
+            "league champion",
+            "league c",
+        },
+        Args: []CommandArg {
+            {
+                Title: "champion",
+                Required: true,
+            },
+        },
+        Examples: []string {
+            "`c lol c aatrox` will return details about Aatrox",
+        },
+        Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+c(hamp(ion)?)?\s+\S+`),
+        Handler: lolchamphandler,
+    },
 
     /* Util Commands */
     {
