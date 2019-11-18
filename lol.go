@@ -1,18 +1,18 @@
 package main
 
 import (
-	"net/http"
+    "net/http"
     "net/url"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
     "log"
     "strings"
     "strconv"
     "time"
     "os"
 
-	"github.com/bwmarrin/discordgo"
+    "github.com/bwmarrin/discordgo"
 )
 
 const (
@@ -77,11 +77,11 @@ func loadChampionsFile() *ChampionFile {
     cfile := &ChampionFile{}
 
     fcontents, err := ioutil.ReadFile("championFull.json")
-	if err != nil {
+    if err != nil {
         log.Printf("Error loading championFull.json:\n%v\n", err)
-		return nil
-	}
-	
+        return nil
+    }
+    
     err = json.Unmarshal(fcontents, cfile)
     if err != nil {
         log.Printf("Error parsing championFull.json:\n%v\nPlease delete the file and run the bot again.\n", err)
@@ -93,8 +93,8 @@ func loadChampionsFile() *ChampionFile {
         nmap[strings.ToLower(strings.ReplaceAll(champ, "'", ""))] = champdata
     }
     cfile.Data = nmap
-	
-	return cfile
+    
+    return cfile
 }
 
 func getLatestVersion() string {
@@ -204,9 +204,13 @@ func (s *Summoner) GetIconURL(version string) string {
     return fmt.Sprintf(PROFILE_ICON, version, s.ProfileIconID)
 }
 
+func sanitizeChampionName(champname string) string {
+    return strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(champname), " ", ""), "'", "")
+}
+
 // returns -1 if not found
 func (helper *LeagueHelper) getChampionIDByName(name string) int {
-    sname := strings.ReplaceAll(strings.ReplaceAll(strings.ToLower(name), "'", ""), " ", "")
+    sname := sanitizeChampionName(name)
     for k, v := range(helper.ChampionData.Data) {
         if k == sname {
             idval, _ := strconv.Atoi(v.Key)
