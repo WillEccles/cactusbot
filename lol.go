@@ -613,7 +613,7 @@ func (helper *LeagueHelper) GetSummonerMasteryEmbed(summonername, champname stri
 var brtag = regexp.MustCompile(`(?i)(<br/?>)+`)
 var htmltag = regexp.MustCompile(`(?i)<[^<]+>`)
 func sanitizeDescription(desc string) string {
-    return htmltag.ReplaceAllString(brtag.ReplaceAllString(desc, "\n"), "")
+    return htmltag.ReplaceAllString(brtag.ReplaceAllString(desc, "\n"), "*")
 }
 
 func (helper *LeagueHelper) GetChampionEmbed(champname string) *discordgo.MessageEmbed {
