@@ -35,6 +35,8 @@ const (
     VERSIONS_URL = "https://ddragon.leagueoflegends.com/api/versions.json"
     // gets championFull.json
     CHAMPION_FULL = "http://ddragon.leagueoflegends.com/cdn/%v/data/en_US/championFull.json"
+    // gets server status
+    SERVER_STATUS = "/lol/status/v3/shard-data"
 )
 
 // returns true if all is well; false if not
@@ -67,7 +69,11 @@ func (helper *LeagueHelper) Init(token string) bool {
     }
     
     if !downloaded {
-        helper.UpdateData()
+        _, err := helper.UpdateData()
+        if err != "" {
+            log.Println("Error in helper.Init:\n%v\n", err)
+            return false
+        }
     }
 
     return true
@@ -237,6 +243,58 @@ func MakeErrorEmbed(err string) *discordgo.MessageEmbed {
         Color: 0xCC0000,
         Description: err,
     }
+}
+
+func (helper *LeagueHelper) getStatus() (*ServerStatus, string) {
+    requrl := API_URL + SERVER_STATUS + "?api_key=" + helper.Token
+
+    resp, err := http.Get(requrl)
+    if err != nil {
+        if resp.StatusCode != 200 && resp.StatusCode != 404 {
+            log.Printf("Error in getStatus:\n%v\n", err)
+            return nil, "Error retrieving data from API"
+        }
+    }
+    defer resp.Body.Close()
+
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Printf("Error in getStatus:\n%v\n", err)
+        return nil, "Error reading data from API"
+    }
+
+    status := &ServerStatus{}
+    err = json.Unmarshal(body, &status)
+    if err != nil {
+        log.Printf("Error in getStatus:\n%v\n", err)
+        return nil, "Error parsing data from the API"
+    }
+
+    return status, ""
+}
+
+func (helper *LeagueHelper) GetStatusEmbed() *discordgo.MessageEmbed {
+    embed := &discordgo.MessageEmbed{}
+
+    status, err := helper.getStatus()
+    if err != "" {
+        return MakeErrorEmbed(err)
+    }
+
+    if status.Status != nil {
+        return MakeErrorEmbed(status.Status.Message)
+    }
+
+    embed.Title = "Server Status (NA1)"
+    embed.Color = 0xD13739
+    for _, service := range(status.Services) {
+        embed.Fields = append(embed.Fields, &discordgo.MessageEmbedField{
+            Name: service.Name,
+            Value: strings.Title(service.Status),
+        })
+    }
+
+    return embed
 }
 
 func (helper LeagueHelper) GetSummoner(summonername string) (*Summoner, string) {

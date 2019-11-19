@@ -231,6 +231,20 @@ var Commands = []Command {
         Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+c(hamp(ion)?)?\s+\S+`),
         Handler: lolchamphandler,
     },
+    {
+        Name: "lol status",
+        Description: "Gets League of Legends service statuses.",
+        Category: "lol",
+        Aliases: []string {
+            "lol s",
+            "l status",
+            "l s",
+            "league status",
+            "league s",
+        },
+        Pattern: regexp.MustCompile(`(?i)^c\s+l(ol|eague)?\s+s(tatus)?`),
+        Handler: lolstatushandler,
+    },
 
     /* Util Commands */
     {

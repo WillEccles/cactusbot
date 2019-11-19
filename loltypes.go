@@ -138,3 +138,47 @@ type ChampionPassiveDTO struct {
 
     Image   *ImageDTO   `json:"image,omitempty"`
 }
+
+type ServerStatus struct {
+    Name        string      `json:"name,omitempty"`
+    RegionTag   string      `json:"region_tag,omitempty"`
+    Hostname    string      `json:"hostname,omitempty"`
+    Slug        string      `json:"slug,omitempty"`
+    Locales     []string    `json:"locales,omitempty"`
+
+    Services    []*Service  `json:"services,omitempty"`
+    Status  *LeagueStatus   `json:"status,omitempty"`
+}
+
+type Service struct {
+    Status  string  `json:"status,omitempty"`
+    Name    string  `json:"name,omitempty"`
+    Slug    string  `json:"slug,omitempty"`
+
+    Incidents   []*Incident `json:"incidents,omitempty"`
+}
+
+type Incident struct {
+    Active      bool    `json:"active,omitempty"`
+    CreatedAt   string  `json:"created_at,omitempty"`
+    ID          uint64  `json:"id,omitempty"`
+
+    Updates []*Message  `json:"updates,omitempty"`
+}
+
+type Message struct {
+    Severity    string  `json:"severity,omitempty"`
+    Author      string  `json:"author,omitempty"`
+    CreatedAt   string  `json:"created_at,omitempty"`
+    UpdatedAt   string  `json:"updated_at,omitempty"`
+    Content     string  `json:"content,omitempty"`
+    ID          string  `json:"id,omitempty"`
+
+    Translations    []*Translation  `json:"translations,omitempty"`
+}
+
+type Translation struct {
+    Locale      string  `json:"locale,omitempty"`
+    Content     string  `json:"content,omitempty"`
+    UpdatedAt   string  `json:"updated_at,omitempty"`
+}

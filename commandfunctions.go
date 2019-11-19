@@ -358,3 +358,11 @@ func lolchamphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
         log.Printf("Error in lolchamphandler:\n%v\n", err)
     }
 }
+
+func lolstatushandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    embed := LeagueData.GetStatusEmbed()
+    _, err := s.ChannelMessageSendEmbed(msg.ChannelID, embed)
+    if err != nil {
+        log.Printf("Error in lolstatushandler:\n%v\n", err)
+    }
+}
