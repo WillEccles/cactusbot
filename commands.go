@@ -20,6 +20,7 @@ func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
         return
     }
 
+    s.ChannelTyping(msg.ChannelID)
     cmd.Handler(msg, s)
 }
 
