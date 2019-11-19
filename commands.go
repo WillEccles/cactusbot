@@ -248,16 +248,6 @@ var Commands = []Command {
 
     /* Util Commands */
     {
-        Name: "invite",
-        Description: "Creates a discord invite link to add this bot to another server.",
-        Aliases: []string {
-            "inv",
-        },
-        Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+inv(ite)?`),
-        Category: "util",
-        Handler: invitehandler,
-    },
-    {
         Name: "help",
         Description: "Displays this help message.",
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+help.*`),
@@ -300,6 +290,16 @@ var Commands = []Command {
         AdminOnly: true,
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+\S+`),
         Handler: echohandler,
+    },
+    {
+        Name: "invite",
+        Description: "Creates a discord invite link to add this bot to another server.",
+        AdminOnly: true,
+        Aliases: []string {
+            "inv",
+        },
+        Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+inv(ite)?`),
+        Handler: invitehandler,
     },
 }
 
