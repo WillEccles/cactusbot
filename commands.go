@@ -298,7 +298,6 @@ var Commands = []Command {
     {
         Name: "bossnass",
         Description: "Does a Boss Nass impression.",
-        AdminOnly: true,
         NoTyping: true,
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+bossnass`),
         Handler: bossnasshandler,
