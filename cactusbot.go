@@ -1,6 +1,7 @@
 package main
 
 import (
+    "encoding/binary"
     "fmt"
     "syscall"
     "os"
@@ -8,12 +9,13 @@ import (
     "log"
     "regexp"
     "strings"
+    "io"
 
     "github.com/bwmarrin/discordgo"
 )
 
 const (
-    Perms = 251968
+    Perms = 540400704
     InvURL = "<https://discordapp.com/oauth2/authorize?&client_id=%v&scope=bot&permissions=%v>"
     RepoURL = "https://github.com/willeccles/cactusbot"
 )
@@ -33,17 +35,18 @@ var DadSanitizer = regexp.MustCompile(`(?i)@+(everyone|here)`)
 var DadEnabler = regexp.MustCompile(`(?i)^c\s+dad\s+(on|off)`)
 var EnableDad = false
 
+var bossnass = make([][]byte, 0)
+var hasbossnass = false
+
 func init() {
     log.SetPrefix("[Cactusbot] ")
     log.Println("init: loading config")
     Config = LoadConfig()
-    //go WriteConfig(Config) // if config is out of date, this updates it
     if Config.LeagueToken == "" {
         log.Println("League token not found; 'lol' commands will be disabled.")
         EnableLOL = false
     } else {
         if !LeagueData.Init(Config.LeagueToken) {
-            // TODO disable league commands
             log.Println("Error initializing league data; league commands will be disabled")
             EnableLOL = false
         }
@@ -52,6 +55,13 @@ func init() {
     InitHelpEmbed(&HelpEmbed)
     CommandEmbeds = make(map[string]*discordgo.MessageEmbed)
     InitCommandEmbeds(CommandEmbeds)
+    err := loadsound()
+    if err != nil {
+        hasbossnass = false
+        log.Println("No boss nass.");
+    } else {
+        hasbossnass = true
+    }
 }
 
 func main() {
@@ -180,7 +190,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
                     })
                 }
             }
-            err := s.WebhookExecute(Config.LogWebhookID, Config.LogWebhookToken, false, &whp)
+            _, err := s.WebhookExecute(Config.LogWebhookID, Config.LogWebhookToken, false, &whp)
             if err != nil {
                 log.Println("Error in messageCreate:\n%v\n", err)
             }
@@ -219,4 +229,43 @@ func resume(s *discordgo.Session, event *discordgo.Resumed) {
     if err != nil {
         log.Printf("Error in resume (this is awkward):\n%v\n", err)
     }
+}
+
+func loadsound() error {
+    file, err := os.Open("boss nass.dca")
+	if err != nil {
+		return err
+	}
+
+	var opuslen int16
+
+	for {
+		// Read opus frame length from dca file.
+		err = binary.Read(file, binary.LittleEndian, &opuslen)
+
+		// If this is the end of the file, just return.
+		if err == io.EOF || err == io.ErrUnexpectedEOF {
+			err := file.Close()
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// Read encoded pcm from dca file.
+		InBuf := make([]byte, opuslen)
+		err = binary.Read(file, binary.LittleEndian, &InBuf)
+
+		// Should not be any end of file errors
+		if err != nil {
+			return err
+		}
+
+		// Append encoded pcm data to the buffer.
+		bossnass = append(bossnass, InBuf)
+	}
 }

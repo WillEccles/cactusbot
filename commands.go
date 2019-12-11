@@ -20,7 +20,9 @@ func (cmd *Command) Handle(msg *discordgo.MessageCreate, s *discordgo.Session) {
         return
     }
 
-    s.ChannelTyping(msg.ChannelID)
+    if cmd.NoTyping == false {
+        s.ChannelTyping(msg.ChannelID)
+    }
     cmd.Handler(msg, s)
 }
 
@@ -275,6 +277,7 @@ var Commands = []Command {
             "sd",
         },
         AdminOnly: true,
+        NoTyping: true,
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+(shutdown|sd)`),
         Handler: shutdownhandler,
     },
@@ -291,6 +294,14 @@ var Commands = []Command {
         AdminOnly: true,
         Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+echo\s+\S+`),
         Handler: echohandler,
+    },
+    {
+        Name: "bossnass",
+        Description: "Does a Boss Nass impression.",
+        AdminOnly: true,
+        NoTyping: true,
+        Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+bossnass`),
+        Handler: bossnasshandler,
     },
     {
         Name: "invite",

@@ -19,6 +19,7 @@ type Command struct {
     Handler     MsgHandler
     Category    string // if "" the command won't be listed in help menu
     AdminOnly   bool
+    NoTyping    bool // whether or not the command should show the bot as "typing"
 }
 
 type CommandArg struct {

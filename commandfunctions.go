@@ -366,3 +366,46 @@ func lolstatushandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
         log.Printf("Error in lolstatushandler:\n%v\n", err)
     }
 }
+
+func bossnasshandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    guild, err := s.State.Guild(msg.GuildID)
+    if err != nil {
+        log.Printf("Error in bossnasshandler:\n%v\n", err)
+        return
+    }
+
+    for _, vs := range guild.VoiceStates {
+        if vs.UserID == msg.Author.ID {
+            // TODO play sound here
+            if !hasbossnass {
+                _, err = s.ChannelMessageSend(msg.ChannelID, "No boss nass :(")
+                if err != nil {
+                    log.Printf("Error in bossnasshandler:\n%v\n", err)
+                    return
+                }
+            } else {
+                vc, err := s.ChannelVoiceJoin(msg.GuildID, vs.ChannelID, false, false)
+                if err != nil {
+                    log.Printf("Error in bossnasshandler:\n%v\n", err)
+                    return
+                }
+
+                time.Sleep(250 * time.Millisecond)
+
+                vc.Speaking(true)
+
+                for _, buff := range bossnass {
+                    vc.OpusSend <- buff
+                }
+
+                vc.Speaking(false)
+
+                time.Sleep(250 * time.Millisecond)
+
+                vc.Disconnect()
+
+                return
+            }
+        }
+    }
+}
