@@ -186,6 +186,7 @@ func (helper *LeagueHelper) UpdateData() (bool, string) {
         // set the latest data into the helper
         helper.ChampionData = cfile
         log.Printf("Successfully updated League data to %v\n", latestver)
+        helper.Version = latestver
         return true, ""
     } else {
         log.Printf("League data is up-to-date (version %v)\n", helper.Version)
