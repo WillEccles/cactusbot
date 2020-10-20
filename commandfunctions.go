@@ -409,3 +409,13 @@ func bossnasshandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
         }
     }
 }
+
+func pfphandler(msg *discordgo.MessageCreate, s *discordgo.Session) {
+    re := regexp.MustCompile(`(?i)^c(actus)?\s+pfp\s*`)
+    cleanmsg := re.ReplaceAllString(msg.Content, "")
+    if len(cleanmsg) != 0 {
+        // look up the specified user
+    } else {
+        // look up the author
+    }
+}

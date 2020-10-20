@@ -268,6 +268,13 @@ var Commands = []Command {
         Category: "util",
         Handler: srchandler,
     },
+    {
+        Name: "pfp",
+        Description: "Grabs your profile picture or that of the person mentioned.",
+        Pattern: regexp.MustCompile(`(?i)^c(actus)?\s+pfp\s*?(\s+<@\d+>)?`),
+        Category: "util",
+        Handler: pfphandler,
+    },
 
     /* Admin Commands */
     {
