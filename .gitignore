@@ -2,3 +2,4 @@ cactusbot
 *.swp
 run.sh
 *.json
+go.sum
